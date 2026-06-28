@@ -1,4 +1,4 @@
-# LinkedIn Company-Page Scraper
+#  Website-targeted Scraper
 
 A targeted, authenticated scraper for LinkedIn company pages. It uses a
 real Chromium browser, passively intercepts the company's Voyager
