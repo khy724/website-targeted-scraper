@@ -1,0 +1,25 @@
+{
+  "source_url": "https://www.linkedin.com/company/elevenlabsio/jobs/",
+  "tab": "jobs",
+  "slug": "elevenlabsio",
+  "company": {
+    "name": "ElevenLabs",
+    "tagline": "Transforming how we interact with technology through AI research and products."
+  },
+  "posts": [],
+  "stats": {
+    "posts": 0,
+    "comments": 0,
+    "unresolved_authors": 0,
+    "api_buckets": {
+      "company_overview": 1,
+      "updates": 0,
+      "comments": 0,
+      "profile_lookups": 2,
+      "reactions": 0,
+      "jobs": 0,
+      "products": 0,
+      "graphql_other": 10
+    }
+  }
+}

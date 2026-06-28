@@ -1,0 +1,473 @@
+"""End-to-end orchestrator.
+
+The flow:
+    1. Launch Chromium with persistent profile + stealth init script.
+    2. Attach the response interceptor BEFORE navigating.
+    3. For each requested tab (home / about / posts / jobs / products):
+         - Build the canonical URL and pin to it (re-navigate if the page drifts).
+         - Reset captured payloads.
+         - safe_goto, wait for the overview card, scroll/expand if relevant.
+         - Build a per-tab record (API-first, DOM-patch) and write
+           `scraped_<slug>_<tab>.json`.
+    4. Raw payloads stay in `api_dumps/` for learning.
+"""
+from __future__ import annotations
+
+import json
+import re
+import time
+from pathlib import Path
+from typing import Any, Iterable
+
+from playwright.sync_api import Locator, Page
+
+from . import api_extractor, browser, config, dom_extractor, interceptor
+from .auth import handle_auth_wall
+
+
+_SLUG_RE = re.compile(r"/company/([^/?#]+)")
+
+
+def _slug_from_url(url: str) -> str:
+    m = _SLUG_RE.search(url or "")
+    return m.group(1) if m else ""
+
+
+def _canonical_url(slug: str, tab_path: str) -> str:
+    base = f"https://www.linkedin.com/company/{slug}/"
+    return base + tab_path
+
+
+def _pinned_goto(page: Page, target_url: str, slug: str, tab_path: str, attempts: int = 3) -> bool:
+    """Navigate and verify the browser actually ended up on a URL containing
+    /company/<slug>/<tab_path>. If it drifted (e.g. redirected to a post detail
+    view), re-navigate up to `attempts` times. Returns True on success.
+    """
+    expected_fragment = f"/company/{slug}/{tab_path}".rstrip("/")
+    for i in range(1, attempts + 1):
+        browser.safe_goto(page, target_url)
+        current = (page.url or "").rstrip("/")
+        if expected_fragment in current:
+            return True
+        print(f"[pin] attempt {i}: page drifted to {page.url!r}; expected fragment {expected_fragment!r}")
+        time.sleep(config.SHORT_WAIT_S)
+    print(f"[pin] giving up after {attempts} attempts; continuing with {page.url}")
+    return False
+
+
+# ---------------------------------------------------------------------------
+# Scroll loop
+# ---------------------------------------------------------------------------
+def _scroll_feed(page: Page, max_posts: int) -> None:
+    """Scroll until we've loaded `max_posts` cards OR plateaued N cycles in a row.
+
+    Alternates a `scrollBy` (incremental, so lazy-loaders that listen for
+    scroll events fire) with a `scrollTo(scrollHeight)` (snaps to the bottom
+    so IntersectionObservers on the sentinel element trigger).
+    """
+    plateau = 0
+    last_count = 0
+    cycle = 0
+    while True:
+        count = page.locator(config.POST_CARD).count()
+        if count >= max_posts:
+            print(f"[scroll] reached target {count}/{max_posts} posts.")
+            return
+        if count == last_count:
+            plateau += 1
+            if plateau >= config.SCROLL_PLATEAU_CYCLES:
+                print(f"[scroll] plateau at {count} posts -- stopping.")
+                return
+        else:
+            print(f"[scroll] loaded {count} posts so far (target {max_posts}).")
+            plateau = 0
+        last_count = count
+        if cycle % 2 == 0:
+            page.evaluate(f"window.scrollBy(0, {config.SCROLL_STEP_PX});")
+        else:
+            page.evaluate("window.scrollTo(0, document.body.scrollHeight);")
+        cycle += 1
+        time.sleep(config.MEDIUM_WAIT_S)
+        handle_auth_wall(page)
+
+
+# ---------------------------------------------------------------------------
+# Per-post comment expansion
+# ---------------------------------------------------------------------------
+def _click_until_gone(
+    page: Page,
+    region: Locator,
+    selector: str,
+    max_clicks: int,
+    label: str,
+) -> int:
+    """Click matching buttons inside `region` until none remain or `max_clicks` reached.
+    Returns the number of successful clicks.
+    """
+    clicks = 0
+    for _ in range(max_clicks):
+        btn = region.locator(selector).first
+        if btn.count() == 0:
+            break
+        try:
+            if not btn.is_visible():
+                break
+            btn.scroll_into_view_if_needed(timeout=2000)
+            btn.click(timeout=2000)
+            clicks += 1
+            time.sleep(config.SHORT_WAIT_S)
+            handle_auth_wall(page)
+        except Exception:
+            break
+    if clicks:
+        print(f"[expand] {label}: clicked {clicks}x")
+    return clicks
+
+
+def _expand_post_comments(page: Page, post: Locator, max_pages: int) -> None:
+    """Open comments, expand the post body, page through comments,
+    then expand any nested reply threads + 'see more' inside comments.
+    `max_pages` caps each click loop separately (so e.g. max_pages=3 allows
+    3 'Load more comments' clicks AND 3 'Show more replies' clicks).
+    """
+    # 1. Expand the post body itself ("see more") so DOM fallback gets full text.
+    _click_until_gone(page, post, config.POST_SEE_MORE, max_clicks=2, label="post see-more")
+
+    # 2. Open the comments panel.
+    toggle = post.locator(config.COMMENT_TOGGLE).first
+    if toggle.count() == 0:
+        return
+    try:
+        toggle.scroll_into_view_if_needed(timeout=2000)
+        toggle.click(timeout=2000)
+    except Exception:
+        return
+    time.sleep(config.MEDIUM_WAIT_S)
+    handle_auth_wall(page)
+
+    # 3. Page through top-level comments.
+    _click_until_gone(page, post, config.COMMENT_LOAD_MORE, max_clicks=max_pages, label="load-more-comments")
+
+    # 4. Expand nested reply threads.
+    _click_until_gone(page, post, config.COMMENT_REPLY_LOAD_MORE, max_clicks=max_pages, label="show-replies")
+
+    # 5. Expand "see more" inside long comment bodies.
+    _click_until_gone(page, post, config.COMMENT_SEE_MORE, max_clicks=max_pages * 4, label="comment see-more")
+
+
+# ---------------------------------------------------------------------------
+# Reactors modal
+# ---------------------------------------------------------------------------
+def _close_reactors_modal(page: Page) -> None:
+    btn = page.locator(config.REACTORS_MODAL_DISMISS).first
+    try:
+        if btn.count() > 0 and btn.is_visible():
+            btn.click(timeout=1500)
+            return
+    except Exception:
+        pass
+    try:
+        page.keyboard.press("Escape")
+    except Exception:
+        pass
+
+
+def _collect_reactors_for_post(
+    page: Page,
+    post: Locator,
+    max_scrolls: int,
+) -> list[dict[str, str]]:
+    """Click the reactions button on a post, scroll the modal until plateau
+    (or `max_scrolls` reached), harvest reactor rows, close the modal.
+    Returns [] on any failure.
+    """
+    btn = post.locator(config.POST_REACTIONS_BUTTON).first
+    if btn.count() == 0:
+        print("[reactors] no data-reaction-details button on this post -- skipping")
+        return []
+    try:
+        btn.scroll_into_view_if_needed(timeout=2000)
+        btn.click(timeout=2500)
+    except Exception as e:
+        print(f"[reactors] click failed: {e}")
+        return []
+    try:
+        page.locator(config.REACTORS_MODAL).first.wait_for(state="visible", timeout=config.SELECTOR_TIMEOUT_MS)
+    except Exception as e:
+        print(f"[reactors] modal did not open: {e}")
+        _close_reactors_modal(page)
+        return []
+    time.sleep(config.SHORT_WAIT_S)
+    handle_auth_wall(page)
+
+    last_count = 0
+    plateau = 0
+    for _ in range(max_scrolls):
+        items = page.locator(config.REACTORS_MODAL).first.locator(config.REACTOR_ITEM)
+        count = items.count()
+        if count == last_count:
+            plateau += 1
+            if plateau >= 2:
+                break
+        else:
+            plateau = 0
+        last_count = count
+        try:
+            page.evaluate(
+                "(sel) => { const el = document.querySelector(sel); if (el) el.scrollTop = el.scrollHeight; }",
+                config.REACTORS_MODAL_SCROLLER.split(",")[0].strip(),
+            )
+        except Exception:
+            pass
+        time.sleep(config.SHORT_WAIT_S)
+        handle_auth_wall(page)
+
+    reactors = dom_extractor.extract_reactors_from_modal(page)
+    print(f"[reactors] harvested {len(reactors)} rows (modal item count: {last_count})")
+    _close_reactors_modal(page)
+    time.sleep(config.SHORT_WAIT_S)
+    return reactors
+
+
+# ---------------------------------------------------------------------------
+# Merge API + DOM
+# ---------------------------------------------------------------------------
+def _merge(
+    page: Page,
+    payloads: interceptor.CapturedPayloads,
+    slug: str,
+    tab: str,
+) -> dict[str, Any]:
+    company_overview = payloads.bucket("company_overview")
+    updates = payloads.bucket("updates")
+    comments_buckets = payloads.bucket("comments") + payloads.bucket("updates")
+    profile_buckets = payloads.bucket("profile_lookups") + payloads.bucket("comments") + payloads.bucket("updates")
+
+    company = api_extractor.extract_company(company_overview, slug=slug) or {}
+    header_dom = dom_extractor.extract_company_header(page)
+    for k, v in header_dom.items():
+        company.setdefault(k, v)
+
+    posts = api_extractor.extract_posts(updates)
+    comments = api_extractor.extract_comments(comments_buckets)
+    profile_lookup = api_extractor.build_profile_lookup(profile_buckets)
+
+    posts_by_urn = {p["urn"]: p for p in posts}
+    dom_comments: list[dict[str, Any]] = []
+    for post_card in page.locator(config.POST_CARD).all():
+        urn = post_card.get_attribute("data-urn") or ""
+        if not urn:
+            continue
+        post_text = dom_extractor.extract_post_text_fallback(post_card)
+        posts_by_urn.setdefault(urn, {
+            "urn": urn,
+            "author_name": "",
+            "author_profile": "",
+            "text": post_text,
+            "reactions_count": 0,
+            "comments_count": 0,
+        })
+        existing = posts_by_urn[urn]
+        if not existing.get("text"):
+            existing["text"] = post_text or dom_extractor.extract_text_by_subtraction(post_card)
+
+        # DOM fallback for reactions / comments counts: only fill when API gave 0.
+        if not existing.get("reactions_count"):
+            r = dom_extractor.extract_reactions_from_card(post_card)
+            if r["reactions_count"]:
+                existing["reactions_count"] = r["reactions_count"]
+            if r["reactions_label"] and not existing.get("reactions_label"):
+                existing["reactions_label"] = r["reactions_label"]
+        if not existing.get("comments_count"):
+            c_count = dom_extractor.extract_comments_count_from_card(post_card)
+            if c_count:
+                existing["comments_count"] = c_count
+
+        for card in post_card.locator(config.COMMENT_CARD).all():
+            author = dom_extractor.resolve_author(card, profile_lookup)
+            body = ""
+            try:
+                body_loc = card.locator(config.COMMENT_TEXT).first
+                if body_loc.count() > 0:
+                    body = (body_loc.text_content(timeout=500) or "").strip()
+            except Exception:
+                pass
+            if not body:
+                body = dom_extractor.extract_text_by_subtraction(card)
+            if not body:
+                continue
+            # Comment URN is in data-id on modern markup, data-urn on legacy.
+            comment_urn = ""
+            for attr in config.COMMENT_URN_ATTRS:
+                v = card.get_attribute(attr) or ""
+                if v.startswith("urn:li:comment:"):
+                    comment_urn = v
+                    break
+            dom_comments.append({
+                "comment_urn": comment_urn,
+                "post_urn": urn,
+                "text": body,
+                **author,
+            })
+
+    seen_urns = {c["comment_urn"] for c in comments if c.get("comment_urn")}
+    seen_texts = {(c.get("post_urn"), c.get("text")) for c in comments}
+    for dc in dom_comments:
+        if dc["comment_urn"] and dc["comment_urn"] in seen_urns:
+            continue
+        if (dc["post_urn"], dc["text"]) in seen_texts:
+            continue
+        comments.append(dc)
+
+    posts_list = list(posts_by_urn.values())
+    by_post: dict[str, list[dict[str, Any]]] = {}
+    for c in comments:
+        by_post.setdefault(c.get("post_urn") or "", []).append(c)
+    for p in posts_list:
+        p["comments"] = by_post.get(p["urn"], [])
+
+    failed = sum(1 for c in comments if c.get("name_resolution") == "failed")
+    print(f"[merge:{tab}] posts={len(posts_list)}  comments={len(comments)}  unresolved_authors={failed}")
+
+    return {
+        "source_url": page.url,
+        "tab": tab,
+        "slug": slug,
+        "company": company,
+        "posts": posts_list,
+        "stats": {
+            "posts": len(posts_list),
+            "comments": len(comments),
+            "unresolved_authors": failed,
+            "api_buckets": {
+                name: len(payloads.bucket(name))
+                for name in (
+                    "company_overview", "updates", "comments",
+                    "profile_lookups", "reactions",
+                    "jobs", "products", "graphql_other",
+                )
+            },
+        },
+    }
+
+
+# ---------------------------------------------------------------------------
+# Per-tab scrape
+# ---------------------------------------------------------------------------
+def _scrape_one_tab(
+    page: Page,
+    payloads: interceptor.CapturedPayloads,
+    slug: str,
+    tab: str,
+    tab_path: str,
+    max_posts: int,
+    max_comment_pages: int,
+    collect_reactors: bool = False,
+    max_reactor_scrolls: int = 10,
+) -> dict[str, Any]:
+    payloads.reset()
+    target = _canonical_url(slug, tab_path)
+    print(f"[main] tab={tab}  -> {target}")
+    _pinned_goto(page, target, slug, tab_path)
+
+    for sel in config.COMPANY_HEADER_HOOKS:
+        try:
+            page.locator(sel).first.wait_for(state="visible", timeout=config.SELECTOR_TIMEOUT_MS)
+            break
+        except Exception:
+            continue
+    time.sleep(config.SHORT_WAIT_S)
+
+    reactors_by_urn: dict[str, list[dict[str, str]]] = {}
+    # Posts/home tabs benefit from scroll + comment expansion. Others don't.
+    if tab in ("home", "posts"):
+        _scroll_feed(page, max_posts)
+        cards = page.locator(config.POST_CARD).all()[:max_posts]
+        for i, card in enumerate(cards, 1):
+            print(f"[main:{tab}] expanding comments on post {i}/{len(cards)}")
+            _expand_post_comments(page, card, max_comment_pages)
+            if collect_reactors:
+                urn = card.get_attribute("data-urn") or ""
+                rx = _collect_reactors_for_post(page, card, max_reactor_scrolls)
+                if urn and rx:
+                    reactors_by_urn[urn] = rx
+                    print(f"[main:{tab}] post {i}: collected {len(rx)} reactors")
+    else:
+        # Light scroll so lazy content (jobs list, product cards) loads.
+        for _ in range(3):
+            page.evaluate(f"window.scrollBy(0, {config.SCROLL_STEP_PX});")
+            time.sleep(config.SHORT_WAIT_S)
+            handle_auth_wall(page)
+
+    time.sleep(config.MEDIUM_WAIT_S)  # let trailing responses arrive
+    result = _merge(page, payloads, slug=slug, tab=tab)
+    # Attach reactors after merge so per-post records carry them.
+    if reactors_by_urn:
+        for post in result.get("posts", []):
+            rx = reactors_by_urn.get(post.get("urn", ""))
+            if rx:
+                post["reactors"] = rx
+        result.setdefault("stats", {})["posts_with_reactors"] = sum(
+            1 for p in result.get("posts", []) if p.get("reactors")
+        )
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Public entry point
+# ---------------------------------------------------------------------------
+def scrape_company(
+    url: str,
+    max_posts: int = config.DEFAULT_MAX_POSTS,
+    max_comment_pages: int = config.DEFAULT_MAX_COMMENT_PAGES,
+    headless: bool = False,
+    output_path: Path | str | None = None,
+    tabs: Iterable[str] = config.DEFAULT_TABS,
+    collect_reactors: bool = False,
+    max_reactor_scrolls: int = 10,
+) -> dict[str, dict[str, Any]]:
+    """Scrape one or more sub-tabs of a LinkedIn company page.
+
+    Writes one JSON per tab named `scraped_<slug>_<tab>.json` next to the
+    repo root. Returns a dict keyed by tab name.
+
+    `output_path`: if provided, must be a directory; per-tab files are
+    written inside it. If None, files land next to `config.OUTPUT_FILE`.
+    """
+    config.API_DUMP_DIR.mkdir(parents=True, exist_ok=True)
+
+    slug = _slug_from_url(url)
+    if not slug:
+        raise ValueError(f"Could not extract company slug from URL: {url!r}")
+
+    tab_map = dict(config.TAB_PATHS)
+    requested = [t for t in tabs if t in tab_map]
+    if not requested:
+        raise ValueError(f"No valid tabs in {list(tabs)!r}; pick from {list(tab_map)!r}")
+
+    out_dir = Path(output_path) if output_path else Path(config.OUTPUT_FILE).parent
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    results: dict[str, dict[str, Any]] = {}
+
+    with browser.launch(headless=headless) as (context, page):
+        payloads = interceptor.attach(page, dump_dir=config.API_DUMP_DIR)
+        for tab in requested:
+            try:
+                result = _scrape_one_tab(
+                    page, payloads, slug, tab, tab_map[tab],
+                    max_posts, max_comment_pages,
+                    collect_reactors=collect_reactors,
+                    max_reactor_scrolls=max_reactor_scrolls,
+                )
+            except Exception as e:
+                print(f"[main:{tab}] failed: {e}")
+                result = {"tab": tab, "slug": slug, "error": str(e)}
+            results[tab] = result
+
+            tab_file = out_dir / f"scraped_{slug}_{tab}.json"
+            with open(tab_file, "w", encoding="utf-8") as f:
+                json.dump(result, f, indent=2, ensure_ascii=False)
+            print(f"[main] wrote {tab_file}")
+
+    return results

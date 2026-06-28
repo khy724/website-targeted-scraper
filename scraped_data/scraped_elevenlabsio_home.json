@@ -1,0 +1,38 @@
+{
+  "source_url": "https://www.linkedin.com/feed/update/urn:li:activity:7476265993242148864/",
+  "tab": "home",
+  "slug": "elevenlabsio",
+  "company": {
+    "name": "ElevenLabs",
+    "universal_name": "elevenlabsio",
+    "tagline": "Transforming how we interact with technology through AI research and products.",
+    "website": "https://www.elevenlabs.io/",
+    "headquarters": null
+  },
+  "posts": [
+    {
+      "urn": "urn:li:activity:7476265993242148864",
+      "author_name": "ElevenLabs",
+      "author_profile": "",
+      "text": "Retired headteacher Irene Perrin has volunteered at St George's Chapel at Windsor Castle for 20 years. When she started to lose her voice to Motor Neurone Disease, it could have stopped her doing the work she loves.\n\nOur new film follows Irene's life after her speech deteriorated, and shows how her AI voice enables her to continue educating visitors from around the world.",
+      "reactions_count": 0,
+      "comments_count": 0,
+      "comments": []
+    }
+  ],
+  "stats": {
+    "posts": 1,
+    "comments": 0,
+    "unresolved_authors": 0,
+    "api_buckets": {
+      "company_overview": 4,
+      "updates": 1,
+      "comments": 1,
+      "profile_lookups": 3,
+      "reactions": 1,
+      "jobs": 0,
+      "products": 0,
+      "graphql_other": 17
+    }
+  }
+}

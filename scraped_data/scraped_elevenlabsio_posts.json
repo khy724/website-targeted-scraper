@@ -1,0 +1,832 @@
+{
+  "source_url": "https://www.linkedin.com/company/elevenlabsio/posts/",
+  "tab": "posts",
+  "slug": "elevenlabsio",
+  "company": {
+    "name": "ElevenLabs",
+    "tagline": "Transforming how we interact with technology through AI research and products."
+  },
+  "posts": [
+    {
+      "urn": "urn:li:activity:7475955573679755264",
+      "author_name": "",
+      "author_profile": "",
+      "text": "As our models improve, identifying AI-generated audio requires more than the human ear. We're partnering with Google DeepMind to embed SynthID - an inaudible digital watermark - directly into ElevenLabs-generated audio, and these watermarks will be detectable using our new free ElevenLabs Audio Detector. The more that we can all attribute content to its source, the more trustworthy our shared information ecosystem will be.",
+      "reactions_count": 371,
+      "comments_count": 11,
+      "reactions_label": "371",
+      "comments": [
+        {
+          "comment_urn": "urn:li:comment:(activity:7475955573679755264,7475965567863054336)",
+          "post_urn": "urn:li:activity:7475955573679755264",
+          "text": "This is a huge and very important partnership.ElevenLabs teaming up with Google DeepMind to embed SynthID (an inaudible digital watermark) directly into AI-generated audio is a major step toward solving one of the biggest challenges in generative AI: provenance and trust.As audio models get better and harder to distinguish from real voices, technical solutions like this that allow reliable detection become essential. This collaboration between two leading players shows real commitment to building a more trustworthy AI ecosystem.Excellent move. This kind of responsible innovation is exactly what the industry needs right now.",
+          "author_urn": "urn:li:comment:(activity:7475955573679755264,7475965567863054336)",
+          "author_name": "Cyrus Santiago",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/cyrus-santiago",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7475955573679755264,7476250345606721536)",
+          "post_urn": "urn:li:activity:7475955573679755264",
+          "text": "Watermarking proves what you made, not what you did not. SynthID flags ElevenLabs audio, but the scam call uses an open model with no watermark, and a missing watermark proves nothing. Strong for attribution, close to useless as a deepfake detector in the wild",
+          "author_urn": "urn:li:comment:(activity:7475955573679755264,7476250345606721536)",
+          "author_name": "Michał Piszczek",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/michalpiszczek",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7475955573679755264,7475955838587764736)",
+          "post_urn": "urn:li:activity:7475955573679755264",
+          "text": "Read more on our blog: www.elevenlabs.io/blog/synthid",
+          "author_urn": "urn:li:comment:(activity:7475955573679755264,7475955838587764736)",
+          "author_name": "ElevenLabs’ profile",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/company/elevenlabsio/posts",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7475955573679755264,7475999610528907264)",
+          "post_urn": "urn:li:activity:7475955573679755264",
+          "text": "I had such idea last year. Need to protect audio content through watermark. I believe the system will add some sort of undectable noise...",
+          "author_urn": "urn:li:comment:(activity:7475955573679755264,7475999610528907264)",
+          "author_name": "Vincent Nwaka",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/vincentwap",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7475955573679755264,7475986517341995008)",
+          "post_urn": "urn:li:activity:7475955573679755264",
+          "text": "Do you have Acoustic AI for machinery?",
+          "author_urn": "urn:li:comment:(activity:7475955573679755264,7475986517341995008)",
+          "author_name": "Pardon Chindito",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/pardon-chindito-4761464b",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7475955573679755264,7476043515894882304)",
+          "post_urn": "urn:li:activity:7475955573679755264",
+          "text": "Just in time for the rise of local AI voice cloning. Goodluck.",
+          "author_urn": "urn:li:comment:(activity:7475955573679755264,7476043515894882304)",
+          "author_name": "Randell Hendley, DNP, CRNA",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/randell-hendley-dnp-crna-42998a12",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7475955573679755264,7476029695109656576)",
+          "post_urn": "urn:li:activity:7475955573679755264",
+          "text": "Luzi Sennhauser",
+          "author_urn": "urn:li:comment:(activity:7475955573679755264,7476029695109656576)",
+          "author_name": "Francesco Tozzi Spadoni Lorella",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/ftsl",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7475955573679755264,7476216651366105089)",
+          "post_urn": "urn:li:activity:7475955573679755264",
+          "text": "👏",
+          "author_urn": "urn:li:comment:(activity:7475955573679755264,7476216651366105089)",
+          "author_name": "flowtools’ profile",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/company/flowtools-co/posts",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7475955573679755264,7476217894507499522)",
+          "post_urn": "urn:li:activity:7475955573679755264",
+          "text": "👏",
+          "author_urn": "urn:li:comment:(activity:7475955573679755264,7476217894507499522)",
+          "author_name": "Yossi Eliaz (zozoClaw 🦀)",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/yossi-eliaz",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7475955573679755264,7475977170289463297)",
+          "post_urn": "urn:li:activity:7475955573679755264",
+          "text": "This is amazing!",
+          "author_urn": "urn:li:comment:(activity:7475955573679755264,7475977170289463297)",
+          "author_name": "James Pustorino",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/jspustorino",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7475955573679755264,7476326731247722497)",
+          "post_urn": "urn:li:activity:7475955573679755264",
+          "text": "The useful shift here is moving AI-audio trust from perception to attribution.Embedding SynthID directly into ElevenLabs-generated audio makes detection less about guessing by ear and more about a repeatable provenance check. The hard part now is workflow adoption: making verification feel like a default, not a special investigation.Where do you think this becomes most useful first: media verification, platform safety, or enterprise content workflows?",
+          "author_urn": "urn:li:comment:(activity:7475955573679755264,7476326731247722497)",
+          "author_name": "Oscar Sanchez",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/oscarsanch",
+          "name_resolution": "dom_tier_B_aria"
+        }
+      ],
+      "reactors": [
+        {
+          "name": "Franck Kei Doua Tiaha",
+          "profile_url": "https://www.linkedin.com/in/ACoAACSWc_kBUGmK7nk20BJdy2BKO-i0aekUvbk",
+          "headline": "TIAHA AI | passionate about AI and ML | Rust/C Lover"
+        },
+        {
+          "name": "Abhijit Pithoole",
+          "profile_url": "https://www.linkedin.com/in/ACoAAFR_I5ABVuQsH0BWtw9VstzpeyWcR1X5V-o",
+          "headline": "Business Intelligence Developer"
+        },
+        {
+          "name": "Elvin Zeinal",
+          "profile_url": "https://www.linkedin.com/in/ACoAADyg8WIB461LiMs4tzVTDBFTSUCbEjIUIEk",
+          "headline": "Senior SDET | AI-Driven Test Automation | Playwright · TypeScript"
+        },
+        {
+          "name": "Dorota Gawryluk",
+          "profile_url": "https://www.linkedin.com/in/ACoAAGlNCKMBWdYxgGlUm6PXk4Xn6eDSrJ8qmvY",
+          "headline": "News & Media Executive | Polsat TV | Among Poland’s most-trusted political journalists (CBOS) | Stanford GSB | Editorial independence & newsroom leadership"
+        },
+        {
+          "name": "Lucas Peccatus",
+          "profile_url": "https://www.linkedin.com/in/ACoAACerZocBuC115VaYVILh-8VhlvEchslWIPU",
+          "headline": "SMB Account Executive at Docusign |Ex-LinkedIn, SAP, Dassault Systèmes| NEOMA Business School 🇫🇷 & Tecnológico de Monterrey 🇲🇽 graduate. Fluent in French, English, Spanish, Portuguese and Creole."
+        },
+        {
+          "name": "Jaimin Bhut",
+          "profile_url": "https://www.linkedin.com/in/ACoAACUYD_EBHwaBKeeFCmV6H5poX4LGsVVxSZg",
+          "headline": "React Native | Node.js | React.js | Flutter"
+        },
+        {
+          "name": "Aakash Deep",
+          "profile_url": "https://www.linkedin.com/in/ACoAABp-nzIBAdCZ2AgF4R8rHIG-ZOEKhIBw4M4",
+          "headline": "Listen to my podcast Decode with Aakash Deep on Spotify"
+        },
+        {
+          "name": "Eric Taucer",
+          "profile_url": "https://www.linkedin.com/in/ACoAACDhKuUBq8Dk_qV6qzbFfEwWJlVMNGGb1Ak",
+          "headline": "Partnerships @ Ada"
+        },
+        {
+          "name": "Taijyu Nagai",
+          "profile_url": "https://www.linkedin.com/in/ACoAAD7CQ-wBR8PV9Z6oKVT-040lQRdv2567a00",
+          "headline": "Philosophy @UC Berkeley | Writing on AI ethics"
+        }
+      ]
+    },
+    {
+      "urn": "urn:li:activity:7474930983671169025",
+      "author_name": "",
+      "author_profile": "",
+      "text": "ElevenLabs is expanding in California. We plan to hire 173 people into research, engineering, sales, and other roles, and invest millions of dollars into our California operations. Read more about our expansion plans and explore our open roles at the link in the comments.",
+      "reactions_count": 171,
+      "comments_count": 6,
+      "reactions_label": "171",
+      "comments": [
+        {
+          "comment_urn": "urn:li:comment:(activity:7474930983671169025,7475760907881435136)",
+          "post_urn": "urn:li:activity:7474930983671169025",
+          "text": "Would be really awesome if you listed a job on your site as \"not taking further applications\" instead of letting me spend my time writing really thoughtful answers, and once I hit apply you say \"We are limiting applicants to give everyone a chance\" bla bla. Do better. Just wasted 30 minutes for nothing.",
+          "author_urn": "urn:li:comment:(activity:7474930983671169025,7475760907881435136)",
+          "author_name": "RIVER JORDAN",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/rivjordan",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7474930983671169025,7474931294653833216)",
+          "post_urn": "urn:li:activity:7474930983671169025",
+          "text": "Explore our open roles: https://elevenlabs.io/careers",
+          "author_urn": "urn:li:comment:(activity:7474930983671169025,7474931294653833216)",
+          "author_name": "ElevenLabs’ profile",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/company/elevenlabsio/posts",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7474930983671169025,7475898888483393536)",
+          "post_urn": "urn:li:activity:7474930983671169025",
+          "text": "We love ElevenLabs 😉",
+          "author_urn": "urn:li:comment:(activity:7474930983671169025,7475898888483393536)",
+          "author_name": "Dialit AI",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/company/dialit-ai/posts",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7474930983671169025,7474931089216778240)",
+          "post_urn": "urn:li:activity:7474930983671169025",
+          "text": "Read our blog: https://elevenlabs.io/blog/expanding-in-california",
+          "author_urn": "urn:li:comment:(activity:7474930983671169025,7474931089216778240)",
+          "author_name": "ElevenLabs’ profile",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/company/elevenlabsio/posts",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7474930983671169025,7474990036527243265)",
+          "post_urn": "urn:li:activity:7474930983671169025",
+          "text": "ElevenLabs Welcome to California! Love your platform.",
+          "author_urn": "urn:li:comment:(activity:7474930983671169025,7474990036527243265)",
+          "author_name": "Steven F. Gonzalez",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/stevegonzalez",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(activity:7474930983671169025,7474974379659943937)",
+          "post_urn": "urn:li:activity:7474930983671169025",
+          "text": "This is fantastic! Love seeing the growth and the investment in California!",
+          "author_urn": "urn:li:comment:(activity:7474930983671169025,7474974379659943937)",
+          "author_name": "Ryan Levy",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/rylevy",
+          "name_resolution": "dom_tier_B_aria"
+        }
+      ],
+      "reactors": [
+        {
+          "name": "Elvin Zeinal",
+          "profile_url": "https://www.linkedin.com/in/ACoAADyg8WIB461LiMs4tzVTDBFTSUCbEjIUIEk",
+          "headline": "Senior SDET | AI-Driven Test Automation | Playwright · TypeScript"
+        },
+        {
+          "name": "Maja D.",
+          "profile_url": "https://www.linkedin.com/in/ACoAAD-bdNkBzXrZJp8GKaItslSpzUMkUjfCp7k",
+          "headline": "Brand Building, Media & Marketing, Social Media, SEO, Content Strategien & Marken Aufbau for Digital Business & eCommerce"
+        },
+        {
+          "name": "András László Tölgyes",
+          "profile_url": "https://www.linkedin.com/in/ACoAAAO2lIsBHVf3MzMCLSkGPz7mZdjsd4KM0rI",
+          "headline": "„Nothing is static | Everything is plastic” | Iratkozz fel a STALKER-re!"
+        },
+        {
+          "name": "Katie Kales",
+          "profile_url": "https://www.linkedin.com/in/ACoAACPDwzQBNlACyC8Ff3UD4aVkYrS0amsG5rU",
+          "headline": "Human Resources Professional | Driving Engagement & Culture | Optimizing Workforces for People & Performance | Employee Relations Specialist | SHRM-CP |"
+        },
+        {
+          "name": "Irma van Mil",
+          "profile_url": "https://www.linkedin.com/in/ACoAAAAR_k0BBvfoItIZ7V1YRJlHcLJ2Md0lZOE",
+          "headline": "Director Formula & Business Improvement Customer Commercial Operations KPN"
+        },
+        {
+          "name": "Abigail Yarger",
+          "profile_url": "https://www.linkedin.com/in/ACoAAAw7UtoBbDtAE2OKaCbK9m6EW3QKhtXeSeg",
+          "headline": "Impact-oriented, Communications, Partnerships, Public Policy"
+        },
+        {
+          "name": "Lourenço Forjaz",
+          "profile_url": "https://www.linkedin.com/in/ACoAADoAZf0Bi-jFQ1wb36ReFJ96FCHr_7pqnIw",
+          "headline": "Augusta Labs - Transforming organisations with AI"
+        },
+        {
+          "name": "Todd Smith",
+          "profile_url": "https://www.linkedin.com/in/ACoAACph4DEBx-1VEDu4Hg0zL4rnyYIrqP9wQb8",
+          "headline": "ASU Sun Devil Graduate | Master of Legal Studies | Brand Protection, IP, Contract Law, Data Privacy, AI, Tech Integration"
+        },
+        {
+          "name": "Alexis Raquel Perez",
+          "profile_url": "https://www.linkedin.com/in/ACoAAD5ZpMcB1W3hlHmQF0qy8piZTpo5BwOkgPw",
+          "headline": "Portfolio Operations @ ICONIQ |"
+        }
+      ]
+    },
+    {
+      "urn": "urn:li:activity:7476265993242148864",
+      "author_name": "",
+      "author_profile": "",
+      "text": "Retired headteacher Irene Perrin has volunteered at St George's Chapel at Windsor Castle for 20 years. When she started to lose her voice to Motor Neurone Disease, it could have stopped her doing the work she loves.Our new film follows Irene's life after her speech deteriorated, and shows how her AI voice enables her to continue educating visitors from around the world.",
+      "reactions_count": 94,
+      "comments_count": 6,
+      "reactions_label": "94",
+      "comments": [
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7476262804581232640,7476303444799287296)",
+          "post_urn": "urn:li:activity:7476265993242148864",
+          "text": "What a beautiful way to give back to humanity, and use of the technology to make this world a better place. Elderly people have few remaining routines that get them out of the house, I see it with my own grandparents and grandpa who's also a guide, retaining these routines and giving them this meaning in life at their age means so much to them.",
+          "author_urn": "urn:li:comment:(ugcPost:7476262804581232640,7476303444799287296)",
+          "author_name": "Joachim Talloen",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/joachim-talloen",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7476262804581232640,7476380190177189888)",
+          "post_urn": "urn:li:activity:7476265993242148864",
+          "text": "This is a beautiful use of AI - where technology replaces a capability someone lost enabling them to live a happier life.",
+          "author_urn": "urn:li:comment:(ugcPost:7476262804581232640,7476380190177189888)",
+          "author_name": "Carol Barreyre",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/carolbarreyre",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7476262804581232640,7476302924122505216)",
+          "post_urn": "urn:li:activity:7476265993242148864",
+          "text": "What a beautiful story ❤️",
+          "author_urn": "urn:li:comment:(ugcPost:7476262804581232640,7476302924122505216)",
+          "author_name": "Ania Stichenwirth",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/ania-stichenwirth",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7476262804581232640,7476585849158180864)",
+          "post_urn": "urn:li:activity:7476265993242148864",
+          "text": "This is an incredible story. Enabling someone to continue to do what gives them purpose is so special.",
+          "author_urn": "urn:li:comment:(ugcPost:7476262804581232640,7476585849158180864)",
+          "author_name": "Nadine Jost (Card)’s open to work graphic link",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/nadine-jost-card",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7476262804581232640,7476681103425126400)",
+          "post_urn": "urn:li:activity:7476265993242148864",
+          "text": "1nj*xx I. You J haveP? Id",
+          "author_urn": "urn:li:comment:(ugcPost:7476262804581232640,7476681103425126400)",
+          "author_name": "Ruben Villanueva",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/ruben-villanueva-12bb0a53",
+          "name_resolution": "dom_tier_B_aria"
+        }
+      ],
+      "reactors": [
+        {
+          "name": "Lucas Stefan",
+          "profile_url": "https://www.linkedin.com/in/ACoAAET4flYB5rnbNPexdbAld7uSD-gxCITA4Yk",
+          "headline": "Information Science Student @ University of Maryland | IT Intern @ Klima, Peters, Daly, P.A"
+        },
+        {
+          "name": "Elvin Zeinal",
+          "profile_url": "https://www.linkedin.com/in/ACoAADyg8WIB461LiMs4tzVTDBFTSUCbEjIUIEk",
+          "headline": "Senior SDET | AI-Driven Test Automation | Playwright · TypeScript"
+        },
+        {
+          "name": "Om Chauhan",
+          "profile_url": "https://www.linkedin.com/in/ACoAADu4nQ0B4CWSb9TBMwbhjTSGifraqtM9CS0",
+          "headline": "Software Engineer | Java, Spring Boot, AWS, ReactJS | Architecting Scalable and Resilient Distributed Systems | MSSE@ASU"
+        },
+        {
+          "name": "Malavika Kumar",
+          "profile_url": "https://www.linkedin.com/in/ACoAABA2MQUB5ljfiMMso9Adm9cvwwLpSN1n3aA",
+          "headline": "Product Marketing at Unframe AI"
+        },
+        {
+          "name": "Malcolm Ng",
+          "profile_url": "https://www.linkedin.com/in/ACoAAAKcZtwBKSlGqr6-BSbl7V-YBMQ4StY_Vao",
+          "headline": "Senior Account Director@Google | Digital Transformation, Business Outcomes"
+        },
+        {
+          "name": "Inga Makarova-Krentsel",
+          "profile_url": "https://www.linkedin.com/in/ACoAADamb7sBYyM1J4wtIZ05P5fpPDK6pjDUSnA",
+          "headline": "Video Editor & Director | 17+ Years in TV Production | Premiere Pro, AI Dubbing"
+        },
+        {
+          "name": "Eric Taucer",
+          "profile_url": "https://www.linkedin.com/in/ACoAACDhKuUBq8Dk_qV6qzbFfEwWJlVMNGGb1Ak",
+          "headline": "Partnerships @ Ada"
+        },
+        {
+          "name": "Alan Brown",
+          "profile_url": "https://www.linkedin.com/in/ACoAAAcMHdwBHRbAiSoXC1i1R6UQH-4hr4TmSIs",
+          "headline": "Follow for AI news and tutorials on Coding, Design & Agents / Building monkmode.app / ElevenLabs Ambassador"
+        },
+        {
+          "name": "Ewa Borowczyk, Ph.D., MBA",
+          "profile_url": "https://www.linkedin.com/in/ACoAAAOiJVwBrODJbO18H7-QpTMZLIKWl7pMU8A",
+          "headline": "Professor of Anatomy and Physiology"
+        },
+        {
+          "name": "Dhruvil Prajapati",
+          "profile_url": "https://www.linkedin.com/in/ACoAAEYH5XABuScmASZarFktdK6S_VoKg5CmRmk",
+          "headline": "Data Science Explorer | Turning Data into Insights | Python Enthusiast | Passionate About Problem-Solving with Code | Machine Learning"
+        }
+      ]
+    },
+    {
+      "urn": "urn:li:activity:7475547700436963328",
+      "author_name": "",
+      "author_profile": "",
+      "text": "Sports AI with Colin Cowherd is live in the FOX Sports App.Fans can ask prominent FOX Sports personality Colin Cowherd questions about FIFA World Cup group stage, fantasy football picks, and bold takes on who is struggling this season. He'll give you a real answer, push back if he thinks you're wrong, and leave you with a gut check question.Read more about how we built this with FOX Sports in the comments.",
+      "reactions_count": 133,
+      "comments_count": 7,
+      "reactions_label": "133",
+      "comments": [
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475547119123148800,7475881387997306881)",
+          "post_urn": "urn:li:activity:7475547700436963328",
+          "text": "Voice technology is opening up new possibilities for creators, educators and brands. The most exciting part is how storytelling can become more scalable without losing emotion.Curious to see how creative teams use this in real client workflows.",
+          "author_urn": "urn:li:comment:(ugcPost:7475547119123148800,7475881387997306881)",
+          "author_name": "Create Positive",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/company/createposiitive/posts",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475547119123148800,7475628033664692224)",
+          "post_urn": "urn:li:activity:7475547700436963328",
+          "text": "A licensed AI voice of a real person is one confident wrong hot-take away from a brand problem. Who approves what the Cowherd agent is allowed to say, and who is liable the day it freelances on a live game",
+          "author_urn": "urn:li:comment:(ugcPost:7475547119123148800,7475628033664692224)",
+          "author_name": "Michał Piszczek",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/michalpiszczek",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475547119123148800,7475726900552704000)",
+          "post_urn": "urn:li:activity:7475547700436963328",
+          "text": "After securing voice agent safety with Guardrails 2.0, ElevenLabs showcased its conversational platform via an interactive Einstein agent, then landed LOT Polish Airlines. Now it extends into sports media, partnering with FOX Sports on a Colin Cowherd AI agent",
+          "author_urn": "urn:li:comment:(ugcPost:7475547119123148800,7475726900552704000)",
+          "author_name": "HeadsUpAI",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/company/headsupai-io/posts",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475547119123148800,7475547803881123842)",
+          "post_urn": "urn:li:activity:7475547700436963328",
+          "text": "Read more on the blog: https://elevenlabs.io/blog/foxsports",
+          "author_urn": "urn:li:comment:(ugcPost:7475547119123148800,7475547803881123842)",
+          "author_name": "ElevenLabs’ profile",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/company/elevenlabsio/posts",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475547119123148800,7475652810512982017)",
+          "post_urn": "urn:li:activity:7475547700436963328",
+          "text": "Let's go on the fantasy football!!",
+          "author_urn": "urn:li:comment:(ugcPost:7475547119123148800,7475652810512982017)",
+          "author_name": "Nicci Arsenault",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/neechbomb",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475547119123148800,7475551327805222912)",
+          "post_urn": "urn:li:activity:7475547700436963328",
+          "text": "Iconic haha",
+          "author_urn": "urn:li:comment:(ugcPost:7475547119123148800,7475551327805222912)",
+          "author_name": "Michael Wildes’  graphic link",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/michaelmjwildes",
+          "name_resolution": "dom_tier_B_aria"
+        }
+      ],
+      "reactors": [
+        {
+          "name": "Dorota Gawryluk",
+          "profile_url": "https://www.linkedin.com/in/ACoAAGlNCKMBWdYxgGlUm6PXk4Xn6eDSrJ8qmvY",
+          "headline": "News & Media Executive | Polsat TV | Among Poland’s most-trusted political journalists (CBOS) | Stanford GSB | Editorial independence & newsroom leadership"
+        },
+        {
+          "name": "Ynis Wilson",
+          "profile_url": "https://www.linkedin.com/in/ACoAADwboBwBSbKcXrSNbKzR0w9yQm9y0wxfQdQ",
+          "headline": "Hi! I am a graphic designer + video editor + web designer & developer with 3+ yrs exp. Let’s craft stunning, functional visuals together! 🎨✨"
+        },
+        {
+          "name": "Jorge Riquelme",
+          "profile_url": "https://www.linkedin.com/in/ACoAABfpzZcBviqAdtjTb2XUNODWvdzVKVQ0blE",
+          "headline": "GTM @ ElevenLabs"
+        },
+        {
+          "name": "Krzysztof Oszczapiński",
+          "profile_url": "https://www.linkedin.com/in/ACoAABgEcDYBab-5gmue9-CCXMK1qJ_aPMZIv_E",
+          "headline": "Senior Front-end Software Engineer @ TTMS | Architecting tomorrow’s digital foundations by fusing holistic design with AI agentic automation."
+        },
+        {
+          "name": "Harutaka Ashitate",
+          "profile_url": "https://www.linkedin.com/in/ACoAAAFnrl8BRH6oCpBzOlkwAzWfaGr8d-gxW_o",
+          "headline": "Executive Advisor | Entertainment and Content Strategic Partnership & Business Development & IP Produce | Platform and Media"
+        },
+        {
+          "name": "Sho (Jack) Teramura",
+          "profile_url": "https://www.linkedin.com/in/ACoAAAV7anUB5BS955V0eHW5fS8jiC0ZflJCQVA",
+          "headline": "Japan & Korea Growth Marketing Lead @ ElevenLabs | AI Voice, GTM Strategy & Market Expansion"
+        },
+        {
+          "name": "Jim (Hajime) Tamura",
+          "profile_url": "https://www.linkedin.com/in/ACoAAADoohgBHeYNA4TDHO08inBe2nnrDlNm8jg",
+          "headline": "GTM @ ElevenLabs | Revenue architect | ex-Asana, ex-Microsoft"
+        },
+        {
+          "name": "Gabriella Fondario",
+          "profile_url": "https://www.linkedin.com/in/ACoAACT0YXkB5TVPvJhoxyCdVk2nX_FJiNToHts",
+          "headline": "AI Product @ FOX"
+        },
+        {
+          "name": "Alex Tahlberg",
+          "profile_url": "https://www.linkedin.com/in/ACoAADzwEMgBp_F3V5nnkeYBOP1elMTfy7vUgS8",
+          "headline": "Co-Founder | AI"
+        },
+        {
+          "name": "Camilla M.",
+          "profile_url": "https://www.linkedin.com/in/ACoAADp1DLsBo0qf88K94vxE9nlw_EJXOm_Fxp0",
+          "headline": "Corporate Relations @ America Digital World Conference - AI, Tech, Business | Advertiser | Marketing Analyst | Media Planner | Communications"
+        }
+      ]
+    },
+    {
+      "urn": "urn:li:activity:7475184144902348800",
+      "author_name": "",
+      "author_profile": "",
+      "text": "Today, we’re releasing The Odyssey: an audiobook narrated by the voice of Sir Michael Caine, with original music and cinematic sound design.The entire audiobook was created by ElevenProductions using our AI audio models.Listen to The Odyssey for free exclusively on ElevenReader.",
+      "reactions_count": 333,
+      "comments_count": 18,
+      "reactions_label": "333",
+      "comments": [
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475189165400182785)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "Fascinating to see how quickly audio storytelling continues to evolve. Looking forward to hearing how listeners respond to this interpretation of a classic.",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475189165400182785)",
+          "author_name": "Booktrack",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/company/booktrack/posts",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475794527979528192)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "We've quietly crossed a major milestone in AI.Not long ago, AI-generated voice sounded robotic and unnatural. Today, an entire audiobook of The Odyssey can be narrated in the voice of Michael Caine, complete with original music, cinematic sound design, and production quality that rivals traditional studios.The gap between synthetic and human-created audio is shrinking faster than most people realize.AI isn't just generating voices anymore. It's producing experiences.hashtag#AI hashtag#GenerativeAI hashtag#VoiceAI hashtag#Audiobooks hashtag#FutureOfMedia",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475794527979528192)",
+          "author_name": "Kevin Isom",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/kevin-b-isom",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475535784595513344)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "Have you ever thought about what happens to the sound design of an audiobook when you want to listen a little faster?",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475535784595513344)",
+          "author_name": "Daniel Che",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/daniel--che",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475190096401661953)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "Amazing to hear The Odyssey in Sir Michael Caine's voice. But I have to ask the obvious question.. Did he approve of this project?",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475190096401661953)",
+          "author_name": "Katrina Nguyen",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/katrina-nguyen-467b28143",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475230248440172545)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "AI is making things accessible that used to be out of reach for most people. An audiobook with cinematic sound design narrated by Sir Michael Caine's voice. That would have been unimaginable a few years ago.",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475230248440172545)",
+          "author_name": "Makersquare.ai",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/company/makersquare-ai/posts",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475356343965556736)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "What is the cinematic sound design hiding?",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475356343965556736)",
+          "author_name": "Theo Gibson’s open to work graphic link",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/theo-gibson-17a17022",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475184233175617537)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "Listen to The Odyssey on ElevenReader: https://elevenreader.io/the-odyssey Read more about the production on our blog: https://elevenlabs.io/blog/the-odyssey-michael-caine",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475184233175617537)",
+          "author_name": "ElevenLabs’ profile",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/company/elevenlabsio/posts",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475184687532019712)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "Incredible!!! Huge congrats on this ingenious project Dustin Blank Jack McDermott 👏 Can’t wait to listen.",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475184687532019712)",
+          "author_name": "Gabi Leibowitz",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/gabi-leibowitz-a55786209",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475258799566651393)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "Which edition is he reading from? There are translations by Robert Fagles, Emily Wilson.",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475258799566651393)",
+          "author_name": "Steven Song",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/steven-song-16193774",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475260813671313408)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "Fantastic idea... and really well executed... this changes the whole production landscape for audio books!",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475260813671313408)",
+          "author_name": "Mike Barnes’  graphic link",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/mikebarnes",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475205208617410561)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "🌎  ⛵  👁️  🐍",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475205208617410561)",
+          "author_name": "Pointshop",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/company/pointshopspace/posts",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475197833558532096)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "Sir Christopher Nolan would be proud!",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475197833558532096)",
+          "author_name": "Nikos Giotis’  graphic link",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/ngiotis000",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475329450277015552)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "Now, this is how audio storytelling should sound! Full experience! ✨",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475329450277015552)",
+          "author_name": "Ulrika H Munther",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/ulrikamunther",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475222918352760832)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "V be no ññ my hb bby",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475222918352760832)",
+          "author_name": "Sabuj Bandopadhyay",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/sabujbandopadhyay",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475272352621252609)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "Way? It's Raining here.. perfect for this weather. Downloading now.",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475272352621252609)",
+          "author_name": "Ryan Conklin",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/ryanconklin-cloud",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475495386904739841)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "We can help bring such legendary stories to South Asian and Middle eastern region. www.lingoscribe.ai",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475495386904739841)",
+          "author_name": "Lingoscribe AI",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/company/lingoscribe/posts",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475335847052210177)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "Thank you for sharing!",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475335847052210177)",
+          "author_name": "Sarina R.",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/sarinarouhani00",
+          "name_resolution": "dom_tier_B_aria"
+        },
+        {
+          "comment_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475267504978931712)",
+          "post_urn": "urn:li:activity:7475184144902348800",
+          "text": "This is incredible!",
+          "author_urn": "urn:li:comment:(ugcPost:7475183737492770817,7475267504978931712)",
+          "author_name": "Nadine Jost (Card)’s open to work graphic link",
+          "author_headline": "",
+          "author_profile": "https://www.linkedin.com/in/nadine-jost-card",
+          "name_resolution": "dom_tier_B_aria"
+        }
+      ],
+      "reactors": [
+        {
+          "name": "Joshua Huckaba",
+          "profile_url": "https://www.linkedin.com/in/ACoAAC98xYoBgTMo-HEdgm82FmlKoWHlb8PQlxo",
+          "headline": "Founder, Chefly Back Office Suite | Android SaaS Developer | AI Systems Specialist"
+        },
+        {
+          "name": "Awder Kurdi",
+          "profile_url": "https://www.linkedin.com/in/ACoAAD9XihcBhwXywQyi87B_vqlTIj91XLB-4S4",
+          "headline": "Filmmaker | Screenwriter | Visual Storyteller | DOP | Photographer"
+        },
+        {
+          "name": "Eric Taucer",
+          "profile_url": "https://www.linkedin.com/in/ACoAACDhKuUBq8Dk_qV6qzbFfEwWJlVMNGGb1Ak",
+          "headline": "Partnerships @ Ada"
+        },
+        {
+          "name": "Matthew Wilkins",
+          "profile_url": "https://www.linkedin.com/in/ACoAAACeWjEBmIPJ5D23GFkHwHRWYKOANGRSRyc",
+          "headline": "AI: From FEAR to CURIOSITY & ACTION | Get practical with AI | Director of Learning Technology at Biz Group (GCC)"
+        },
+        {
+          "name": "🗻Richard Hizon🗻",
+          "profile_url": "https://www.linkedin.com/in/ACoAABALiZMBcnpuZ0kpclomPkyoBRoULY1z96g",
+          "headline": "Customer Support @ Valley"
+        },
+        {
+          "name": "Samuel Chima",
+          "profile_url": "https://www.linkedin.com/in/ACoAADIbrkkBiEaWpSVqnAY9EsoB3pXl2jNtUoU",
+          "headline": "Techprenuer⚡ Talk Tech History & Events"
+        },
+        {
+          "name": "Amarjeet Kumar",
+          "profile_url": "https://www.linkedin.com/in/ACoAAFmuR3YB0rRKo5Zyb5qrgmcWF3Nx1_iju8k",
+          "headline": "--"
+        },
+        {
+          "name": "Roger P.",
+          "profile_url": "https://www.linkedin.com/in/ACoAAA8sfpcBBaGTlNbtHKYC5BCtm2aHeC2O5HY",
+          "headline": "Product & Solutions Leader | Fintech, Payments & AI/ML"
+        },
+        {
+          "name": "Katie Kales",
+          "profile_url": "https://www.linkedin.com/in/ACoAACPDwzQBNlACyC8Ff3UD4aVkYrS0amsG5rU",
+          "headline": "Human Resources Professional | Driving Engagement & Culture | Optimizing Workforces for People & Performance | Employee Relations Specialist | SHRM-CP |"
+        },
+        {
+          "name": "Baotong Tian",
+          "profile_url": "https://www.linkedin.com/in/ACoAAETVCccBuCHW9vfasnrgkmn6qzk6VmcBFEA",
+          "headline": "Research Intern @ Adobe | Second-year PhD Student @ UR | Undergrad @ THU | Speech, Music, Audio & Machine Learning | Former Research Intern @ Deepmusic"
+        }
+      ]
+    },
+    {
+      "urn": "urn:li:activity:7474878280651923456",
+      "author_name": "",
+      "author_profile": "",
+      "text": "Introducing Ads Engine by ElevenCreative. Most brands run ads in one language and miss customers in every other market they sell into. Expanding requires separate production cycles, separate budgets, and days to weeks of turnaround per language. Ads Engine removes that overhead.Connect your Google, Meta, and LinkedIn ad accounts. The platform pulls your existing creatives, localizes them across 50+ languages, and pushes the finished ads back to your ad platform. Text, images, and dubbed video with Dubbing V2 preserving the original speaker's voice and emotion.Set up a localization pipeline once, save it as a Template, and any team member can run the same workflow for every new campaign. Localization is the first engine. More capabilities are coming.\n      \n    \n  \n          \n          …more",
+      "reactions_count": 218,
+      "comments_count": 9,
+      "reactions_label": "218",
+      "comments": []
+    },
+    {
+      "urn": "urn:li:activity:7466208306403999744",
+      "author_name": "",
+      "author_profile": "",
+      "text": "🤖 𝗪𝗲 𝗯𝗲𝗻𝗰𝗵𝗺𝗮𝗿𝗸𝗲𝗱 𝗘𝗹𝗲𝘃𝗲𝗻𝗔𝗴𝗲𝗻𝘁𝘀. 𝗛𝗲𝗿𝗲'𝘀 𝘄𝗵𝗮𝘁 𝘄𝗲 𝗳𝗼𝘂𝗻𝗱.Building a great voice agent isn't just about a great model — it's about every layer of the stack working together under real conditions. That's why we recently released EVA-Bench, our open-source framework for evaluating voice agents end-to-end across 𝗘𝗩𝗔-𝗔 (Accuracy) and 𝗘𝗩𝗔-𝗫 (Experience).This week, we evaluated ElevenLabs’ ElevenAgents, and here are the results:•\t𝗦𝗰𝗿𝗶𝗯𝗲 𝘃𝟮.𝟮 𝗥𝗲𝗮𝗹𝘁𝗶𝗺𝗲 𝗶𝘀 𝘁𝗵𝗲 𝘀𝘁𝗿𝗼𝗻𝗴𝗲𝘀𝘁 𝗦𝗧𝗧 𝗺𝗼𝗱𝗲𝗹 𝘄𝗲 𝘁𝗲𝘀𝘁𝗲𝗱. Transcription accuracy on key entities above 95%, holding above 93% under French accent and coffee shop background noise.•\t𝗘𝗹𝗲𝘃𝗲𝗻 𝗙𝗹𝗮𝘀𝗵 𝘃𝟮 𝘀𝗰𝗼𝗿𝗲𝗱 𝗮𝗯𝗼𝘃𝗲 𝟵𝟳% 𝗼𝗻 𝗦𝗽𝗲𝗲𝗰𝗵 𝗙𝗶𝗱𝗲𝗹𝗶𝘁𝘆 - the only metric in any end-to-end voice agent benchmark that evaluates what the agent actually says out loud.•\tOf all 16 systems we benchmarked, 𝗯𝗼𝘁𝗵 𝗘𝗹𝗲𝘃𝗲𝗻𝗔𝗴𝗲𝗻𝘁𝘀 𝗰𝗼𝗻𝗳𝗶𝗴𝘂𝗿𝗮𝘁𝗶𝗼𝗻𝘀 𝗹𝗮𝗻𝗱𝗲𝗱 𝗼𝗻 𝘁𝗵𝗲 𝗣𝗮𝗿𝗲𝘁𝗼 𝗳𝗿𝗼𝗻𝘁𝗶𝗲𝗿. With Claude Haiku, the highest EVA-X score. With GPT-5.4, the highest EVA-A.Shaheen Lavie-Rouse, FDE at ElevenLabs, said it best: \"𝘌𝘝𝘈-𝘉𝘦𝘯𝘤𝘩 𝘪𝘴 𝘵𝘩𝘦 𝘧𝘪𝘳𝘴𝘵 𝘣𝘦𝘯𝘤𝘩𝘮𝘢𝘳𝘬 𝘵𝘩𝘢𝘵 𝘢𝘤𝘵𝘶𝘢𝘭𝘭𝘺 𝘮𝘦𝘢𝘴𝘶𝘳𝘦𝘴 𝘷𝘰𝘪𝘤𝘦 𝘢𝘨𝘦𝘯𝘵 𝘲𝘶𝘢𝘭𝘪𝘵𝘺 𝘦𝘯𝘥-𝘵𝘰-𝘦𝘯𝘥 - 𝘧𝘳𝘰𝘮 𝘵𝘳𝘢𝘯𝘴𝘤𝘳𝘪𝘱𝘵𝘪𝘰𝘯 𝘵𝘰 𝘵𝘢𝘴𝘬 𝘤𝘰𝘮𝘱𝘭𝘦𝘵𝘪𝘰𝘯 𝘵𝘰 𝘴𝘱𝘰𝘬𝘦𝘯 𝘰𝘶𝘵𝘱𝘶𝘵 - 𝘪𝘯 𝘢 𝘸𝘢𝘺 𝘵𝘩𝘢𝘵'𝘴 𝘢𝘤𝘵𝘪𝘰𝘯𝘢𝘣𝘭𝘦 𝘧𝘰𝘳 𝘱𝘦𝘰𝘱𝘭𝘦 𝘣𝘶𝘪𝘭𝘥𝘪𝘯𝘨 𝘢 𝘷𝘰𝘪𝘤𝘦 𝘢𝘨𝘦𝘯𝘵. 𝘞𝘦'𝘳𝘦 𝘢𝘭𝘴𝘰 𝘨𝘭𝘢𝘥 𝘵𝘰 𝘴𝘦𝘦 𝘵𝘸𝘰 𝘥𝘪𝘧𝘧𝘦𝘳𝘦𝘯𝘵 𝘌𝘭𝘦𝘷𝘦𝘯𝘈𝘨𝘦𝘯𝘵𝘴 𝘤𝘰𝘯𝘧𝘪𝘨𝘶𝘳𝘢𝘵𝘪𝘰𝘯𝘴 𝘰𝘯 𝘵𝘩𝘦 𝘗𝘢𝘳𝘦𝘵𝘰 𝘧𝘳𝘰𝘯𝘵𝘪𝘦𝘳.\"This is one of many evaluations we'll be releasing. If you're building voice agents — or building the models that power them — run EVA-Bench on your stack and show us where you land.🔎 Want to know more?🌐 𝗪𝗲𝗯𝘀𝗶𝘁𝗲: https://lnkd.in/eaRnvm7G💻 𝗖𝗼𝗱𝗲: https://lnkd.in/e53m3GYe🗂️ 𝗗𝗮𝘁𝗮𝘀𝗲𝘁: https://lnkd.in/erCqPkc6📄 𝗣𝗮𝗽𝗲𝗿: https://lnkd.in/e_ShvWDwTechnical Contributors: Tara Bogavelli, Gabrielle Gauthier Melançon, Katrina Stankiewicz, Oluwanifemi Bamgbose, Fanny Riols, Hoang Nguyen, Raghav Mehndiratta, Lindsay Brin, Joseph Marinier, Hari SubramaniLeadership & Product: Sridhar Krishna Nemala, Anil Kumar Madamala, Srinivas Sunkara, Joyce Li, Nitin Aggarwalhashtag#VoiceAI hashtag#VoiceAgents hashtag#AIResearch hashtag#ConversationalAI hashtag#ServiceNowResearch hashtag#ElevenLabs\n      \n    \n  \n          \n          …more",
+      "reactions_count": 205,
+      "comments_count": 5,
+      "reactions_label": "205",
+      "comments": []
+    },
+    {
+      "urn": "urn:li:activity:7470062656494649344",
+      "author_name": "",
+      "author_profile": "",
+      "text": "Trainline is Europe’s largest train booking platform serving over 27 million customers. Together, we’re building voice agents that automate refunds when trains are cancelled or delayed. Our agents integrate directly with Trainline’s telephony and ticketing systems - and can scale across their wider customer service operations.\n      \n    \n  \n          \n          …more",
+      "reactions_count": 223,
+      "comments_count": 6,
+      "reactions_label": "223",
+      "comments": []
+    },
+    {
+      "urn": "urn:li:activity:7472566326302171136",
+      "author_name": "",
+      "author_profile": "",
+      "text": "PhysicsWallah prepares over 36 millions of students across India for competitive exams, and government entrance exams.Their AI doubt-solving tool, Ask AI, found that 52% of students learn better through audio. A text-only tool was leaving half their users behind.They integrated ElevenLabs to turn Ask AI into a voice AI tutor - with native Hinglish support, because that is how their students actually speak.Students who learn by listening, stay:- 3x more queries per session vs. non-voice users- 2.4x higher retention at Day 15\n      \n    \n  \n          \n          …more",
+      "reactions_count": 576,
+      "comments_count": 18,
+      "reactions_label": "576",
+      "comments": []
+    }
+  ],
+  "stats": {
+    "posts": 9,
+    "comments": 46,
+    "unresolved_authors": 0,
+    "api_buckets": {
+      "company_overview": 1,
+      "updates": 0,
+      "comments": 11,
+      "profile_lookups": 2,
+      "reactions": 5,
+      "jobs": 0,
+      "products": 0,
+      "graphql_other": 11
+    },
+    "posts_with_reactors": 5
+  }
+}

@@ -1,0 +1,6 @@
+user-data-dir
+user-data-dir-chrome
+.env
+api_dumps
+__pycache__
+.vscode
