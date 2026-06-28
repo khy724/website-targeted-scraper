@@ -1,9 +1,13 @@
 """Passive Voyager/GraphQL response capture.
 
-A single `page.on("response", ...)` listener routes each JSON response into a
-logical bucket (see `config.API_ROUTES`). Raw payloads are kept in-memory for
-the extractors and also dumped to `api_dumps/<bucket>_<n>.json` so you can
-inspect schemas offline.
+A single response listener (attached to the BrowserContext so popups and
+service-worker traffic are caught too) routes each JSON response into a
+logical bucket (see `config.API_ROUTES`). Each capture is stored as a
+`(url, payload)` tuple so extractors and debugging can inspect the
+originating request (queryId, threadUrn, etc.) without re-fetching.
+
+Backward-compat: `bucket(name)` still returns a list of payload dicts
+(no URLs) -- existing extractors don't need to change.
 """
 from __future__ import annotations
 
@@ -13,23 +17,24 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from playwright.sync_api import Page, Response
+from playwright.sync_api import BrowserContext, Page, Response
 
 from . import config
 
 
 class CapturedPayloads:
-    """Keeps every JSON payload, grouped by bucket name."""
+    """Keeps every JSON payload (with its URL), grouped by bucket name."""
 
     def __init__(self, dump_dir: Path | None = None) -> None:
-        self._buckets: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        # bucket -> [(url, payload), ...]
+        self._buckets: dict[str, list[tuple[str, dict[str, Any]]]] = defaultdict(list)
         self._dump_dir = dump_dir
         if dump_dir is not None:
             dump_dir.mkdir(parents=True, exist_ok=True)
 
     # ---- mutators ------------------------------------------------------
     def add(self, bucket: str, payload: dict[str, Any], url: str) -> None:
-        self._buckets[bucket].append(payload)
+        self._buckets[bucket].append((url, payload))
         if self._dump_dir is not None:
             idx = len(self._buckets[bucket])
             stamp = int(time.time())
@@ -44,7 +49,26 @@ class CapturedPayloads:
 
     # ---- accessors -----------------------------------------------------
     def bucket(self, name: str) -> list[dict[str, Any]]:
+        """Return just the payload dicts (backward-compat for extractors)."""
+        return [p for _, p in self._buckets.get(name, ())]
+
+    def bucket_with_urls(self, name: str) -> list[tuple[str, dict[str, Any]]]:
+        """Return (url, payload) tuples for callers that need the request URL."""
         return list(self._buckets.get(name, ()))
+
+    def buckets(self, *names: str) -> list[dict[str, Any]]:
+        """Concat multiple buckets' payloads. Handy for cross-bucket extractors."""
+        out: list[dict[str, Any]] = []
+        for n in names:
+            out.extend(p for _, p in self._buckets.get(n, ()))
+        return out
+
+    def all_payloads(self) -> list[dict[str, Any]]:
+        """Every captured payload across all buckets."""
+        out: list[dict[str, Any]] = []
+        for entries in self._buckets.values():
+            out.extend(p for _, p in entries)
+        return out
 
     def reset(self) -> None:
         """Clear all buckets (used between tab visits)."""
@@ -54,7 +78,7 @@ class CapturedPayloads:
         """Flatten the `included[]` arrays of one or more buckets."""
         out: list[dict[str, Any]] = []
         for b in buckets:
-            for payload in self._buckets.get(b, ()):
+            for _, payload in self._buckets.get(b, ()):
                 inc = payload.get("included")
                 if isinstance(inc, list):
                     out.extend(inc)
@@ -73,8 +97,12 @@ def _classify(url: str) -> str | None:
     return None
 
 
-def attach(page: Page, dump_dir: Path | None = None) -> CapturedPayloads:
-    """Attach a response listener to `page`. Returns the live capture object."""
+def attach(target: BrowserContext | Page, dump_dir: Path | None = None) -> CapturedPayloads:
+    """Attach a response listener to a BrowserContext (preferred) or a Page.
+
+    Context-scope catches popups and service-worker fetches that a page-scope
+    listener misses. Passing a Page still works (backward-compat).
+    """
     payloads = CapturedPayloads(dump_dir=dump_dir)
 
     def on_response(response: Response) -> None:
@@ -94,5 +122,5 @@ def attach(page: Page, dump_dir: Path | None = None) -> CapturedPayloads:
         if isinstance(data, dict):
             payloads.add(bucket, data, url)
 
-    page.on("response", on_response)
+    target.on("response", on_response)
     return payloads

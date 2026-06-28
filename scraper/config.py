@@ -17,7 +17,8 @@ from pathlib import Path
 REPO_ROOT: Path = Path(__file__).resolve().parent.parent
 USER_DATA_DIR: Path = REPO_ROOT / "user-data-dir-chrome"
 API_DUMP_DIR: Path = REPO_ROOT / "api_dumps"
-OUTPUT_FILE: Path = REPO_ROOT / "scraped_company.json"
+SCRAPED_DATA_DIR: Path = REPO_ROOT / "scraped_data"
+OUTPUT_FILE: Path = SCRAPED_DATA_DIR / "scraped_company.json"
 
 # ---------------------------------------------------------------------------
 # Browser
@@ -82,7 +83,10 @@ MFA_TEXT_PATTERNS = (
 API_ROUTES: tuple[tuple[str, str], ...] = (
     ("voyagerOrganizationDashCompaniesByUniversalName", "company_overview"),
     ("OrganizationDashCompanies", "company_overview"),
-    ("voyagerFeedDashUpdatesV2", "updates"),
+    # Feed updates. The current query is `voyagerFeedDashUpdates` (no V2 suffix);
+    # the V2 variant exists on some pages. Substring match catches both.
+    ("voyagerFeedDashOrganizationalPageUpdates", "updates"),
+    ("voyagerFeedDashUpdates", "updates"),
     ("FeedDashUpdates", "updates"),
     ("voyagerSocialDashComments", "comments"),
     ("SocialDashComments", "comments"),
@@ -92,6 +96,9 @@ API_ROUTES: tuple[tuple[str, str], ...] = (
     ("IdentityDashProfiles", "profile_lookups"),
     ("voyagerJobsDashJobCards", "jobs"),
     ("JobsDashJobCards", "jobs"),
+    # Products / photos / targeted content all come back via the
+    # OrganizationDashViewWrapper umbrella query.
+    ("voyagerOrganizationDashViewWrapper", "products"),
     ("voyagerOrganizationDashProducts", "products"),
     ("OrganizationDashProducts", "products"),
     # Generic fallbacks -- caught last so they don't shadow the specific ones
@@ -250,7 +257,17 @@ LINKEDIN_CHROME_PHRASES: tuple[str, ...] = (
 # Scroll / scrape limits (overridable from CLI)
 # ---------------------------------------------------------------------------
 DEFAULT_MAX_POSTS = 10
-DEFAULT_MAX_COMMENT_PAGES = 3
+# Each "Load more comments" click yields ~10 comments. 5 gets us 50/post,
+# enough for the long tail without dragging out the run.
+DEFAULT_MAX_COMMENT_PAGES = 5
+
+# Safety caps used when the user requests an exhaustive scrape
+# (--all-posts / --all-comments / --all-reactors). These are upper bounds;
+# the loops stop earlier on plateau (no new content for 2 consecutive
+# cycles) or when LinkedIn removes the "Load more" button.
+EXHAUSTIVE_POSTS = 5000             # ≈ 5000 posts hard cap per tab
+EXHAUSTIVE_COMMENT_PAGES = 200      # ≈ 2000 comments per post hard cap
+EXHAUSTIVE_REACTOR_SCROLLS = 500    # ≈ 5000 reactors per post hard cap
 SCROLL_STEP_PX = 1500
 SCROLL_PLATEAU_CYCLES = 3
 

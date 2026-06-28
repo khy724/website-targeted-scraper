@@ -242,15 +242,36 @@ def _merge(
     updates = payloads.bucket("updates")
     comments_buckets = payloads.bucket("comments") + payloads.bucket("updates")
     profile_buckets = payloads.bucket("profile_lookups") + payloads.bucket("comments") + payloads.bucket("updates")
+    # Rich Company records show up in many buckets, not just company_overview
+    # (e.g. comments payloads carry the post author's company). Scanning wider
+    # gives extract_company more chances to fill founded_year, website, logo.
+    company_record_sources = (
+        company_overview
+        + payloads.bucket("graphql_other")
+        + payloads.bucket("comments")
+        + payloads.bucket("updates")
+    )
 
-    company = api_extractor.extract_company(company_overview, slug=slug) or {}
+    company = api_extractor.extract_company(company_record_sources, slug=slug) or {}
     header_dom = dom_extractor.extract_company_header(page)
     for k, v in header_dom.items():
         company.setdefault(k, v)
 
+    # Products (only meaningful on the /products tab, harmless elsewhere).
+    products = api_extractor.extract_products(
+        payloads.bucket("products") + payloads.bucket("graphql_other")
+    )
+
     posts = api_extractor.extract_posts(updates)
     comments = api_extractor.extract_comments(comments_buckets)
     profile_lookup = api_extractor.build_profile_lookup(profile_buckets)
+
+    # Reactors from the SocialDashReactions endpoint (primary) -- much richer
+    # and uncapped vs the DOM-modal scrape. The modal scrape stays as fallback
+    # for posts where no reactions payload was captured.
+    reactions_buckets = payloads.bucket("reactions")
+    api_reactors_by_urn = api_extractor.extract_reactors_by_post(reactions_buckets)
+    reactor_totals = api_extractor.reactor_totals(reactions_buckets)
 
     posts_by_urn = {p["urn"]: p for p in posts}
     dom_comments: list[dict[str, Any]] = []
@@ -325,9 +346,23 @@ def _merge(
         by_post.setdefault(c.get("post_urn") or "", []).append(c)
     for p in posts_list:
         p["comments"] = by_post.get(p["urn"], [])
+        # Attach API-derived reactors here (primary source). The DOM-modal
+        # scrape happens later in _scrape_one_tab and only fills gaps for
+        # posts the reactions endpoint didn't cover.
+        rx = api_reactors_by_urn.get(p["urn"])
+        if rx:
+            p["reactors"] = rx
+            p["reactors_source"] = "api"
+        total = reactor_totals.get(p["urn"])
+        if total:
+            p["reactions_total"] = total
 
     failed = sum(1 for c in comments if c.get("name_resolution") == "failed")
-    print(f"[merge:{tab}] posts={len(posts_list)}  comments={len(comments)}  unresolved_authors={failed}")
+    print(
+        f"[merge:{tab}] posts={len(posts_list)}  comments={len(comments)}  "
+        f"unresolved_authors={failed}  reactors_api={sum(len(v) for v in api_reactors_by_urn.values())}  "
+        f"products={len(products)}"
+    )
 
     return {
         "source_url": page.url,
@@ -335,10 +370,13 @@ def _merge(
         "slug": slug,
         "company": company,
         "posts": posts_list,
+        "products": products,
         "stats": {
             "posts": len(posts_list),
             "comments": len(comments),
+            "products": len(products),
             "unresolved_authors": failed,
+            "reactors_via_api": sum(len(v) for v in api_reactors_by_urn.values()),
             "api_buckets": {
                 name: len(payloads.bucket(name))
                 for name in (
@@ -363,7 +401,7 @@ def _scrape_one_tab(
     max_posts: int,
     max_comment_pages: int,
     collect_reactors: bool = False,
-    max_reactor_scrolls: int = 10,
+    max_reactor_scrolls: int = 25,
 ) -> dict[str, Any]:
     payloads.reset()
     target = _canonical_url(slug, tab_path)
@@ -401,15 +439,19 @@ def _scrape_one_tab(
 
     time.sleep(config.MEDIUM_WAIT_S)  # let trailing responses arrive
     result = _merge(page, payloads, slug=slug, tab=tab)
-    # Attach reactors after merge so per-post records carry them.
+    # _merge has already attached API-derived reactors. The DOM-modal scrape
+    # only fills gaps for posts the reactions endpoint didn't cover.
     if reactors_by_urn:
         for post in result.get("posts", []):
+            if post.get("reactors"):
+                continue  # API already filled this
             rx = reactors_by_urn.get(post.get("urn", ""))
             if rx:
                 post["reactors"] = rx
-        result.setdefault("stats", {})["posts_with_reactors"] = sum(
-            1 for p in result.get("posts", []) if p.get("reactors")
-        )
+                post["reactors_source"] = "dom_modal"
+    result.setdefault("stats", {})["posts_with_reactors"] = sum(
+        1 for p in result.get("posts", []) if p.get("reactors")
+    )
     return result
 
 
@@ -424,7 +466,7 @@ def scrape_company(
     output_path: Path | str | None = None,
     tabs: Iterable[str] = config.DEFAULT_TABS,
     collect_reactors: bool = False,
-    max_reactor_scrolls: int = 10,
+    max_reactor_scrolls: int = 25,
 ) -> dict[str, dict[str, Any]]:
     """Scrape one or more sub-tabs of a LinkedIn company page.
 
@@ -445,13 +487,15 @@ def scrape_company(
     if not requested:
         raise ValueError(f"No valid tabs in {list(tabs)!r}; pick from {list(tab_map)!r}")
 
-    out_dir = Path(output_path) if output_path else Path(config.OUTPUT_FILE).parent
+    out_dir = Path(output_path) if output_path else config.SCRAPED_DATA_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
 
     results: dict[str, dict[str, Any]] = {}
 
     with browser.launch(headless=headless) as (context, page):
-        payloads = interceptor.attach(page, dump_dir=config.API_DUMP_DIR)
+        # Attach to the context, not just the page: catches popups, popup-opened
+        # docs, and any service-worker JSON fetches that bypass the page scope.
+        payloads = interceptor.attach(context, dump_dir=config.API_DUMP_DIR)
         for tab in requested:
             try:
                 result = _scrape_one_tab(

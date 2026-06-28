@@ -17,7 +17,7 @@ GraphQL responses, and patches any gaps from the rendered DOM.
 - Modern + legacy DOM markup support
 - API-first extraction with DOM fallback per field (resilient when
   Voyager calls don't fire)
-- Per-tab JSON output: `scraped_<slug>_<tab>.json`
+- Per-tab JSON output: `scraped_data/scraped_<slug>_<tab>.json`
 
 ---
 
@@ -88,12 +88,15 @@ python run_scraper.py --url ... --output my_company.json
 |---|---|---|
 | `--url` | required | Target company URL |
 | `--tabs` | all | Comma list from `home,about,posts,jobs,products` |
-| `--max-posts` | 20 | Cap on posts per feed-style tab |
-| `--max-comment-pages` | 3 | "Load more comments" click cap per post |
+| `--max-posts` | 10 | Cap on posts per feed-style tab |
+| `--all-posts` | off | Scroll the feed until plateau (safety cap 5000). Overrides `--max-posts`. |
+| `--max-comment-pages` | 5 | "Load more comments" click cap per post |
+| `--all-comments` | off | Load EVERY comment per post (plateau-stop, safety cap 200 clicks). Overrides `--max-comment-pages`. |
 | `--reactors` | off | Open the reactions modal on each post and harvest rows |
-| `--max-reactor-scrolls` | 10 | Scroll cap inside the reactors modal |
+| `--max-reactor-scrolls` | 25 | Scroll cap inside the reactors modal |
+| `--all-reactors` | off | Scrape EVERY reactor per post (plateau-stop, safety cap 500 scrolls). Implies `--reactors`. |
 | `--headless` | off | Run Chromium headless (see [docs/CONSIDERATIONS.md](docs/CONSIDERATIONS.md)) |
-| `--output` | `scraped_<slug>_<tab>.json` | Override output path |
+| `--output` | `scraped_data/` | Output directory for per-tab JSON files |
 
 ---
 
