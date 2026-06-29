@@ -49,15 +49,32 @@ PASSWORD1=********
 
 ## First-time setup
 
-Seed a persistent logged-in browser profile. This runs once and writes
-cookies into `user-data-dir/`:
+There are two ways to seed a logged-in profile. Both write cookies into
+the persistent profile dir; subsequent scraper runs reuse them.
+
+**Option A — let the scraper drive login (recommended).** On any
+`run_scraper.py` invocation, if no live `li_at` cookie is detected in
+`user-data-dir-chrome/`, the scraper opens `/login` inside the same
+Chromium window, fills credentials from `.env`, and pauses for MFA if
+LinkedIn challenges you. Complete the challenge in the window and the
+run continues automatically.
+
+You can also trigger the login flow on its own without scraping anything:
+
+```powershell
+python run_scraper.py --login
+```
+
+**Option B — seed via the standalone Camoufox script.** This is the
+original one-time path; useful if you want a Firefox-based profile in
+`user-data-dir/` (separate from the Chromium profile the scraper uses):
 
 ```powershell
 python login.py
 ```
 
 Complete any MFA / captcha in the window that opens. When you reach the
-LinkedIn feed, close the window. You're set.
+LinkedIn feed, close the window.
 
 ---
 
@@ -97,6 +114,8 @@ python run_scraper.py --url ... --output my_company.json
 | `--all-reactors` | off | Scrape EVERY reactor per post (plateau-stop, safety cap 500 scrolls). Implies `--reactors`. |
 | `--headless` | off | Run Chromium headless (see [docs/CONSIDERATIONS.md](docs/CONSIDERATIONS.md)) |
 | `--output` | `scraped_data/` | Output directory for per-tab JSON files |
+| `--record` | off | Record a `.webm` of the run to `demo_videos/<UTC-timestamp>/`. Forces a 1440×900 viewport and adds 120 ms `slow_mo` so scroll/click motion is visible on camera. Don't Ctrl-C mid-run — videos only finalize on clean context close. |
+| `--login` | off | Drive the login flow and exit (no scraping). Idempotent — skips if a live `li_at` cookie is already present. |
 
 ---
 
@@ -143,14 +162,17 @@ category — useful for diagnosing why a field was empty (e.g. `updates:
 ```
 scraping/
 ├── run_scraper.py        # CLI entry point
-├── login.py              # one-time login seeder (Camoufox)
+├── login.py              # one-time login seeder (Camoufox / Firefox)
 ├── scraper/              # package — see docs/ARCHITECTURE.md
 ├── user-data-dir/        # Camoufox/Firefox profile (login.py)
-├── user-data-dir-chrome/ # Chromium profile (scraper)
+├── user-data-dir-chrome/ # Chromium profile (scraper) -- holds `li_at`
 ├── api_dumps/            # raw Voyager payloads (debug aid)
+├── scraped_data/         # per-tab JSON output (default --output)
+├── demo_videos/          # .webm recordings (created only when --record is set)
 └── docs/
     ├── ARCHITECTURE.md   # modules, data flow, auth flow
-    └── CONSIDERATIONS.md # engine/headless/Camoufox trade-offs, limits
+    ├── CONSIDERATIONS.md # engine/headless/Camoufox trade-offs, limits
+    └── SCALING.md        # multi-tenant productionization notes
 ```
 
 ---
@@ -171,10 +193,13 @@ scraping/
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| Pauses with `Press ENTER once you've signed in` | Cookie expired and MFA required | Sign in manually in the window, press ENTER. Or re-run `login.py`. |
+| Pauses with `Press ENTER once you've signed in` | Cookie expired and MFA required | Sign in manually in the window, press ENTER. Or re-run `python run_scraper.py --login`. |
 | `updates: 0` in stats but posts populated | Voyager feed call didn't fire during scroll | Normal — DOM fallback handled it. No action needed. |
 | `comments: []` on a post with `comments_count > 0` | Post scrolled out of view before toggle click | Re-run with smaller `--max-posts`, or see known limitations in CONSIDERATIONS.md. |
 | `[reactors] modal did not open` | Reaction button selector mismatch on a new post type | File an issue with the post URL; selector in `scraper/config.py:POST_REACTIONS_BUTTON` |
+| `[reactors] no scrollable container (list fits in modal)` | Post has fewer reactors than fit in one modal screen | Not an error — that *is* the full list for the post. |
+| `[main:home] post N: card no longer in DOM; skipping` | Feed virtualization detached the card after a prior post's comment expansion | Expected on long feeds; surrounding posts still scrape. Reduce `--max-comment-pages` if it happens too often. |
+| `--record` produced an empty / very short `.webm` | Run was Ctrl-C'd before clean shutdown | Videos only finalize on context close. Let the run finish (or hit Enter at any MFA pause) before stopping. |
 | Empty `author_name` on company posts | API path empty, post-level DOM author tier missing | Cosmetic; comment authors are unaffected. |
 
 ---

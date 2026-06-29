@@ -66,6 +66,22 @@ AUTH_DOM_HOOKS = (
     "input[autocomplete='username']",
     "[data-test-id='captcha-internal']",
     "iframe[title*='captcha' i]",
+    # Contextual sign-in modal shown to guests on /company/<slug>/. The
+    # form fields inside are CSS-hidden until 'Sign in with Email' is
+    # clicked, so we match the modal container instead of the inputs.
+    "div.contextual-sign-in-modal",
+    "div#base-contextual-sign-in-modal",
+)
+# Buttons that reveal a hidden login form inside an in-page modal. Clicking
+# one of these turns a contextual auth-wall into a normal login form that
+# auto_login can fill.
+AUTH_REVEAL_BUTTONS = (
+    "button[data-tracking-control-name='sign-in-with-email-cta']",
+    "button.contextual-sign-in-modal__sign-in-with-email-cta",
+    # /authwall page renders a JOIN form by default; this toggle swaps to
+    # the sign-in form (otherwise we'd POST creds to /signup/api/createAccount).
+    "button[data-tracking-control-name='auth_wall_desktop-login-toggle']",
+    "button.authwall-join-form__form-toggle--bottom",
 )
 # Things that only appear on MFA / extra-challenge screens (not first-time login).
 MFA_TEXT_PATTERNS = (

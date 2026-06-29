@@ -143,6 +143,50 @@ Key sections:
 `safe_goto()` wraps `page.goto` and calls `handle_auth_wall` after
 every navigation so a stale cookie auto-recovers mid-run.
 
+#### Tab navigation: direct URL vs. nav-bar click
+
+Every tab transition (`home`, `about`, `posts`, `jobs`, `products`) is a
+**direct `page.goto(url)`** call — we never click the in-page nav-tab
+bar. We considered the alternative; here's the tradeoff:
+
+| | Direct `page.goto(url)` (current) | In-page nav-bar click |
+|---|---|---|
+| Bot-likeness | Slightly higher — full page reload from cold, no `Referer` chain | Lower — looks like an authenticated SPA route change, sends `Referer`, reuses cached JS bundles |
+| Speed per tab | Slower — full bundle + image reload | Faster — small SPA XHR |
+| Reliability | Higher — bypasses any DOM-tab discoverability issues; URLs are documented in `TAB_PATHS` and stable for years | Lower — the nav-tab DOM uses LinkedIn's obfuscated class soup; selectors rot every few releases |
+| Auth-wall coverage | `safe_goto` re-runs `handle_auth_wall` after each transition | One auth check at the start; mid-flow cookie expiry would slip through |
+| Failure mode | "Navigation interrupted" if a prior nav is still in flight — handled by the settle + single retry in `safe_goto` | Click silently no-ops if selector breaks; we'd extract the *previous* tab's content under the new tab's label |
+
+**We stay direct.** If LinkedIn ever escalates fingerprinting against
+full-reload patterns, the cleanest hybrid is: `page.goto(home_url)`
+once per company, then click subsequent tabs via stable ARIA roles
+(`page.get_by_role("link", name="About")`, etc.). Don't bind to CSS
+classes — they rotate.
+
+#### Demo recording (`--record`)
+
+When `--record` is set, `launch()` passes `record_video_dir`,
+`record_video_size=1440x900`, and `slow_mo=120` to
+`launch_persistent_context`. Playwright writes one `.webm` per `Page`
+object into `demo_videos/<UTC-timestamp>/`. Because we drive everything
+through a single `Page`, every navigation in the run — including the
+pre-flight `/login` flow when the persistent profile has no cookie —
+lands in the same file.
+
+Key properties:
+
+- **Recording is virtual frame capture from the renderer**, not OS-level
+  screen capture. DRM / secure-surface flags don't apply, and Chromium
+  has no "do not record" hint for login pages.
+- **Videos finalize only on clean `context.close()`.** A Ctrl-C mid-run
+  loses the file. Let the run complete (or hit Enter at any MFA pause).
+- **Smooth scrolling is required for visibility.** Instant
+  `scrollTop = scrollHeight` jumps complete in one frame and are
+  invisible at 30 fps. Both `_scroll_until_plateau` and the reactor
+  modal loop use `behavior: 'smooth'` for this reason.
+- **`slow_mo=120` ms** adds a small delay to every Playwright action so
+  clicks and field-fills are legible without making the run unbearable.
+
 ### `scraper/interceptor.py`
 Attached to the **BrowserContext** (not the Page) **before** the first
 navigation, so popups and service-worker fetches are caught too.
@@ -211,28 +255,65 @@ counter button, reactor row extraction from the modal.
 Three-layer recovery — see § 4.
 
 ### `scraper/main.py`
-Orchestrator. For each tab:
+Orchestrator. Top-level `scrape_company` runs a **pre-flight auth check**
+before any navigation:
+
+```python
+if not auth.profile_seems_authenticated():
+    # open /login in the same recorded context, drive credentials,
+    # pause for MFA if needed, then carry on
+```
+
+`profile_seems_authenticated` is a SQLite read of
+`user-data-dir-chrome/Default/Cookies` looking for a non-expired `li_at`
+row on `.linkedin.com`. The cookie value itself is encrypted by the OS
+keychain and we don't decrypt it — a present, unexpired row is enough
+signal. If LinkedIn rotated the session server-side, the regular
+auth-wall recovery on the first navigation still catches it.
+
+Then, for each tab:
 
 1. `_pinned_goto` — navigate and verify URL contains expected fragment
    (retries up to 3× if LinkedIn drifts to a post-detail page)
-2. `payloads.reset()` — this tab starts clean
-3. `_scroll_feed` — alternating `scrollBy` + `scrollTo(scrollHeight)`
-   to trigger both lazy-loader callbacks and IntersectionObservers.
-   With `--all-posts`, loops until plateau or `EXHAUSTIVE_POSTS` cap
-4. `_expand_post_comments` — click toggle, then `Load more comments`,
+2. URL-drift skip — if LinkedIn redirects us off the requested tab
+   (e.g. company has no `/products/` → JS jumps to `/jobs/`), record
+   `skipped: True` with the destination URL instead of mislabeling
+   the destination tab's content as the source tab
+3. `payloads.reset()` — this tab starts clean
+4. **Tab-shape branch:**
+   - `home` / `posts`: `_scroll_feed` — alternating `scrollBy` +
+     `scrollTo(scrollHeight)` to trigger both lazy-loader callbacks and
+     IntersectionObservers, plateau on `POST_CARD` count. With
+     `--all-posts`, safety cap is `EXHAUSTIVE_POSTS`.
+   - everything else (`about` / `jobs` / `products`): `_scroll_until_plateau`
+     — generic plateau scroll keyed off `document.body.scrollHeight`
+     growth, so it works even when there's no `POST_CARD` selector to
+     count. Smooth scrolling so it stays visible on demo recordings.
+5. **URN-stable per-post loop** (home/posts only) — snapshot `data-urn`
+   values for the first N cards *upfront* in a single pass, then
+   re-locate each card via `page.locator(f"[data-urn='{urn}']").first`
+   before each operation. This is the only reliable iteration pattern
+   because:
+   - `_expand_post_comments` injects hundreds of comment nodes that
+     shift sibling indices, breaking any cached `.nth(i)` locator
+   - LinkedIn's feed virtualization detaches off-screen cards entirely
+   Both effects make positional locators time out on `.get_attribute()`.
+   Re-locating by URN survives virtualization (LinkedIn keeps the same
+   `data-urn` even when re-rendering the card). Per-post try/except
+   isolates failures so one bad card doesn't kill the whole tab.
+6. `_expand_post_comments` — click toggle, then `Load more comments`,
    `Show more replies`, comment-body `see more`. With `--all-comments`,
    loops until plateau or `EXHAUSTIVE_COMMENT_PAGES` cap
-5. `_collect_reactors_for_post` (optional, `--reactors` /
-   `--all-reactors`) — click the reactions button, scroll the modal
-   until plateau, harvest rows; capped at `--max-reactor-scrolls`
+7. `_collect_reactors_for_post` (optional, `--reactors` /
+   `--all-reactors`) — see § 5. Capped at `--max-reactor-scrolls`
    (default 25) or `EXHAUSTIVE_REACTOR_SCROLLS` under `--all-reactors`
-6. `_merge()` — field-by-field union:
+8. `_merge()` — field-by-field union:
    - posts: API base + DOM patch (text / counts / author)
    - comments: API base + DOM patch, dedup by `(post_urn, comment_urn)`
    - reactors: API primary (`reactors_source: "api"`); DOM modal kept
      only for posts the API didn't cover (`reactors_source: "dom_modal"`)
    - products: API only
-7. Write `scraped_data/scraped_<slug>_<tab>.json` (one file per tab)
+9. Write `scraped_data/scraped_<slug>_<tab>.json` (one file per tab)
    plus a stats line: `posts=N comments=N reactors_api=N products=N`
 
 ---
@@ -281,6 +362,30 @@ screen. Email is best-effort; password is mandatory. If the submit
 button can't be found it falls back to pressing Enter on the password
 field.
 
+### Pre-flight gate: `profile_seems_authenticated`
+
+Before any navigation, `scrape_company` runs a cheap SQLite check on
+`user-data-dir-chrome/Default/Cookies` for a non-expired `li_at` row
+scoped to `.linkedin.com`. Two outcomes:
+
+- **Cookie present + unexpired** → skip the explicit login goto. The
+  first `safe_goto` to the company page is normal navigation. If
+  LinkedIn rotated the session server-side, `handle_auth_wall` on that
+  same navigation catches it (the diagram above).
+- **Cookie missing or expired** → drive `page.goto("/login")` *inside*
+  the recorded context, so the login flow is on camera under `--record`.
+  After the goto, if we haven't landed on `/feed/` we call
+  `handle_auth_wall` to drive `auto_login` + the MFA pause if needed.
+
+The check uses SQLite's `mode=ro&immutable=1` URI so it can read the
+cookies file even when Chromium has it open from a prior run, and
+returns False on any error (file missing, permission denied, etc.) so
+the caller defaults to running login \u2014 the safe direction.
+
+A user can also invoke the pre-flight path standalone with
+`python run_scraper.py --login`; this is idempotent (no-op if already
+authenticated) and useful for first-time setup.
+
 ---
 
 ## 5. Reactor harvesting
@@ -324,17 +429,32 @@ the API didn't cover (tagged `reactors_source: "dom_modal"`). Flow:
 1. Click the post's reactions button (`POST_REACTIONS_BUTTON =
    button[data-reaction-details]`).
 2. Wait for `REACTORS_MODAL` to be visible.
-3. Loop until plateau (2 consecutive scrolls with no new items) **or**
+3. **Runtime scroller discovery.** Walk every descendant of the modal
+   in JS, pick the element with `overflowY: auto|scroll|overlay` and
+   the largest `scrollHeight - clientHeight` (and `clientHeight > 100px`
+   to skip thin spacers). Tag it with `data-reactor-scroller="1"`.
+   This replaces the previous hard-coded CSS selector — LinkedIn rotates
+   modal class names every few releases, and any element that overflows
+   *is* the scrollable element by definition. If nothing overflows, the
+   reactor list already fits in one screen (post has ≤10 reactors);
+   short-circuit, harvest the visible rows, return.
+4. Loop until plateau (2 consecutive cycles with no new items) **or**
    `max_scrolls` reached:
-   - Set the modal's `scrollTop = scrollHeight`
+   - `scrollBy({top: 600, behavior: 'smooth'})` on the tagged element —
+     incremental + smooth so each scroll is visible on demo recordings
+     (an instant `scrollTop = scrollHeight` jump lands in a single frame
+     and is invisible to a 30 fps camera)
    - Sleep `SHORT_WAIT_S`
-4. Run `extract_reactors_from_modal` to harvest rows.
-5. Close the modal (dismiss button → Escape fallback).
+5. On plateau, do one final smooth `scrollTo(scrollHeight)` and re-count;
+   if that loaded more rows, reset the plateau counter and keep going.
+6. Run `extract_reactors_from_modal` to harvest rows.
+7. Close the modal (dismiss button → Escape fallback).
 
-Default cap is 10 scrolls. Each scroll fires another Voyager page (10
+Default cap is 25 scrolls. Each scroll fires another Voyager page (10
 reactors), so even when the DOM scrape is the visible fallback, the API
 extractor will usually have already pulled those rows from the bucket.
-Override with `--max-reactor-scrolls`.
+Override with `--max-reactor-scrolls`, or use `--all-reactors` for
+plateau-stop with a 500-scroll safety cap.
 
 ---
 

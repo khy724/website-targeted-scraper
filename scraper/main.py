@@ -22,6 +22,7 @@ from typing import Any, Iterable
 from playwright.sync_api import Locator, Page
 
 from . import api_extractor, browser, config, dom_extractor, interceptor
+from . import auth
 from .auth import handle_auth_wall
 
 
@@ -41,14 +42,30 @@ def _canonical_url(slug: str, tab_path: str) -> str:
 def _pinned_goto(page: Page, target_url: str, slug: str, tab_path: str, attempts: int = 3) -> bool:
     """Navigate and verify the browser actually ended up on a URL containing
     /company/<slug>/<tab_path>. If it drifted (e.g. redirected to a post detail
-    view), re-navigate up to `attempts` times. Returns True on success.
+    view or an auth wall), recover or re-navigate up to `attempts` times.
+    Returns True on success.
     """
+    from .auth import handle_auth_wall, is_auth_wall
+
     expected_fragment = f"/company/{slug}/{tab_path}".rstrip("/")
     for i in range(1, attempts + 1):
         browser.safe_goto(page, target_url)
         current = (page.url or "").rstrip("/")
         if expected_fragment in current:
             return True
+        # safe_goto already ran handle_auth_wall once, but a JS-driven redirect
+        # to /authwall can land *after* that check returned. Re-check now and
+        # recover before counting this as a real drift.
+        if is_auth_wall(page):
+            print(f"[pin] attempt {i}: landed on auth wall ({page.url}); attempting recovery.")
+            try:
+                handle_auth_wall(page, return_to=target_url)
+            except Exception as e:
+                print(f"[pin] auth recovery failed: {e}")
+                return False
+            current = (page.url or "").rstrip("/")
+            if expected_fragment in current:
+                return True
         print(f"[pin] attempt {i}: page drifted to {page.url!r}; expected fragment {expected_fragment!r}")
         time.sleep(config.SHORT_WAIT_S)
     print(f"[pin] giving up after {attempts} attempts; continuing with {page.url}")
@@ -89,6 +106,50 @@ def _scroll_feed(page: Page, max_posts: int) -> None:
         cycle += 1
         time.sleep(config.MEDIUM_WAIT_S)
         handle_auth_wall(page)
+
+
+def _scroll_until_plateau(
+    page: Page,
+    max_cycles: int = 15,
+    label: str = "tab",
+) -> None:
+    """Generic scroll for tabs that have no `POST_CARD` (products, jobs, about).
+
+    Uses `document.body.scrollHeight` growth as the plateau signal so it works
+    regardless of what cards LinkedIn renders. Smooth scrolling so it's
+    visible on demo recordings.
+    """
+    plateau = 0
+    last_height = 0
+    for cycle in range(max_cycles):
+        try:
+            height = int(page.evaluate("document.body.scrollHeight") or 0)
+        except Exception:
+            height = 0
+        if height and height == last_height:
+            plateau += 1
+            if plateau >= config.SCROLL_PLATEAU_CYCLES:
+                print(f"[scroll:{label}] plateau at height={height} after {cycle} cycles -- stopping.")
+                return
+        else:
+            if height:
+                print(f"[scroll:{label}] cycle {cycle}: height={height}")
+            plateau = 0
+        last_height = height
+        # Smooth scroll by a step so lazy-loaders that listen for scroll
+        # events fire; every other cycle snap to bottom so any sentinel
+        # IntersectionObservers trigger too.
+        if cycle % 2 == 0:
+            page.evaluate(
+                f"window.scrollBy({{top: {config.SCROLL_STEP_PX}, behavior: 'smooth'}});"
+            )
+        else:
+            page.evaluate(
+                "window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});"
+            )
+        time.sleep(config.MEDIUM_WAIT_S)
+        handle_auth_wall(page)
+    print(f"[scroll:{label}] hit max_cycles={max_cycles}; stopping.")
 
 
 # ---------------------------------------------------------------------------
@@ -202,20 +263,88 @@ def _collect_reactors_for_post(
 
     last_count = 0
     plateau = 0
-    for _ in range(max_scrolls):
+    # Modal-internal step size. Small enough that each scroll is *visibly*
+    # animated in headed/recorded runs (an instant scrollTop = scrollHeight
+    # jump is invisible to a 30fps camera -- it lands in a single frame).
+    SCROLL_STEP_PX = 600
+    # Resolve the real scrollable container at runtime instead of trusting a
+    # fixed CSS class. LinkedIn's modal class names rotate, but the *only*
+    # element inside the dialog whose scrollHeight exceeds its clientHeight
+    # is the reactor list scroller. Walk every descendant once and pick it.
+    scroller_finder_js = """
+    (modalSel) => {
+        const modal = document.querySelector(modalSel);
+        if (!modal) return null;
+        const candidates = modal.querySelectorAll('*');
+        let best = null;
+        let bestOverflow = 0;
+        for (const el of candidates) {
+            const style = getComputedStyle(el);
+            const oy = style.overflowY;
+            if (oy !== 'auto' && oy !== 'scroll' && oy !== 'overlay') continue;
+            const overflow = el.scrollHeight - el.clientHeight;
+            if (overflow > bestOverflow && el.clientHeight > 100) {
+                best = el;
+                bestOverflow = overflow;
+            }
+        }
+        if (!best) return null;
+        // Tag it so subsequent scrolls don't re-walk.
+        best.setAttribute('data-reactor-scroller', '1');
+        return true;
+    }
+    """
+    modal_root_sel = config.REACTORS_MODAL.split(",")[0].strip()
+    try:
+        found = page.evaluate(scroller_finder_js, modal_root_sel)
+    except Exception:
+        found = None
+    if not found:
+        # No overflowing element means the reactor list fits the modal in one
+        # screen -- i.e. this post genuinely has only as many reactors as are
+        # already visible. Not an error; just nothing to scroll.
+        initial = page.locator(config.REACTORS_MODAL).first.locator(config.REACTOR_ITEM).count()
+        print(f"[reactors] no scrollable container (list fits in modal) -- {initial} rows total, no scroll needed")
+        reactors = dom_extractor.extract_reactors_from_modal(page)
+        _close_reactors_modal(page)
+        time.sleep(config.SHORT_WAIT_S)
+        return reactors
+    scroller_sel = "[data-reactor-scroller='1']"
+    for cycle in range(max_scrolls):
         items = page.locator(config.REACTORS_MODAL).first.locator(config.REACTOR_ITEM)
         count = items.count()
         if count == last_count:
             plateau += 1
             if plateau >= 2:
+                # One last hard-bottom jump in case smooth scroll fell short
+                # of triggering the final lazy-load batch.
+                try:
+                    page.evaluate(
+                        "(sel) => { const el = document.querySelector(sel);"
+                        " if (el) el.scrollTo({top: el.scrollHeight, behavior: 'smooth'}); }",
+                        scroller_sel,
+                    )
+                    time.sleep(config.MEDIUM_WAIT_S)
+                    final_count = page.locator(config.REACTORS_MODAL).first.locator(config.REACTOR_ITEM).count()
+                    if final_count > count:
+                        # Bottom-jump actually loaded more -- reset plateau and keep going.
+                        last_count = final_count
+                        plateau = 0
+                        continue
+                except Exception:
+                    pass
                 break
         else:
+            print(f"[reactors] cycle {cycle}: {count} rows loaded")
             plateau = 0
         last_count = count
         try:
+            # Smooth incremental scroll -- visible on camera AND still
+            # triggers IntersectionObserver lazy-loads at the sentinel.
             page.evaluate(
-                "(sel) => { const el = document.querySelector(sel); if (el) el.scrollTop = el.scrollHeight; }",
-                config.REACTORS_MODAL_SCROLLER.split(",")[0].strip(),
+                "(args) => { const el = document.querySelector(args.sel);"
+                " if (el) el.scrollBy({top: args.dy, behavior: 'smooth'}); }",
+                {"sel": scroller_sel, "dy": SCROLL_STEP_PX},
             )
         except Exception:
             pass
@@ -406,7 +535,21 @@ def _scrape_one_tab(
     payloads.reset()
     target = _canonical_url(slug, tab_path)
     print(f"[main] tab={tab}  -> {target}")
-    _pinned_goto(page, target, slug, tab_path)
+    pinned = _pinned_goto(page, target, slug, tab_path)
+
+    # Detect LinkedIn redirecting us off the requested sub-tab (e.g. company
+    # has no /products/ -> LinkedIn JS jumps us to /jobs/). Without this guard
+    # we'd happily scrape the destination tab and label the output as the
+    # source tab, producing wrong data.
+    current = (page.url or "").lower()
+    expected_suffix = tab_path.rstrip("/").lower()
+    if expected_suffix and expected_suffix not in current:
+        msg = (
+            f"redirected off /{expected_suffix}/ to {page.url} -- "
+            f"company likely has no {tab!r} tab; skipping."
+        )
+        print(f"[main:{tab}] {msg}")
+        return {"tab": tab, "slug": slug, "skipped": True, "reason": msg, "final_url": page.url}
 
     for sel in config.COMPANY_HEADER_HOOKS:
         try:
@@ -420,22 +563,57 @@ def _scrape_one_tab(
     # Posts/home tabs benefit from scroll + comment expansion. Others don't.
     if tab in ("home", "posts"):
         _scroll_feed(page, max_posts)
-        cards = page.locator(config.POST_CARD).all()[:max_posts]
-        for i, card in enumerate(cards, 1):
-            print(f"[main:{tab}] expanding comments on post {i}/{len(cards)}")
-            _expand_post_comments(page, card, max_comment_pages)
+        # Snapshot URNs upfront. We CANNOT cache Locator objects across the
+        # per-post loop because (a) _expand_post_comments injects hundreds
+        # of comment nodes that shift sibling indices, and (b) LinkedIn's
+        # feed virtualization detaches off-screen cards. Both break any
+        # subsequent `.nth(i)` resolution with a 15s timeout. Re-locating
+        # by data-urn before each operation is virtualization-stable.
+        raw_cards = page.locator(config.POST_CARD).all()[:max_posts]
+        post_urns: list[str] = []
+        for c in raw_cards:
+            try:
+                u = c.get_attribute("data-urn", timeout=2000) or ""
+            except Exception:
+                u = ""
+            if u and u not in post_urns:
+                post_urns.append(u)
+        print(f"[main:{tab}] captured {len(post_urns)} post URNs to process")
+
+        for i, urn in enumerate(post_urns, 1):
+            # Re-locate by URN -- survives any DOM churn caused by previous
+            # iterations. Falls back to .first since data-urn is unique.
+            card = page.locator(f"[data-urn='{urn}']").first
+            try:
+                card.scroll_into_view_if_needed(timeout=3000)
+            except Exception:
+                # If we can't even bring the card into view it's probably
+                # been virtualized away or removed; skip.
+                print(f"[main:{tab}] post {i}/{len(post_urns)} ({urn}): card no longer in DOM; skipping")
+                continue
+            print(f"[main:{tab}] expanding comments on post {i}/{len(post_urns)}")
+            try:
+                _expand_post_comments(page, card, max_comment_pages)
+            except Exception as e:
+                print(f"[main:{tab}] post {i}: expand_comments failed ({e}); continuing")
             if collect_reactors:
-                urn = card.get_attribute("data-urn") or ""
-                rx = _collect_reactors_for_post(page, card, max_reactor_scrolls)
-                if urn and rx:
+                # Re-locate again before the reactor step -- comment expansion
+                # also moves siblings.
+                card = page.locator(f"[data-urn='{urn}']").first
+                try:
+                    rx = _collect_reactors_for_post(page, card, max_reactor_scrolls)
+                except Exception as e:
+                    print(f"[main:{tab}] post {i}: collect_reactors failed ({e}); continuing")
+                    rx = []
+                if rx:
                     reactors_by_urn[urn] = rx
                     print(f"[main:{tab}] post {i}: collected {len(rx)} reactors")
     else:
-        # Light scroll so lazy content (jobs list, product cards) loads.
-        for _ in range(3):
-            page.evaluate(f"window.scrollBy(0, {config.SCROLL_STEP_PX});")
-            time.sleep(config.SHORT_WAIT_S)
-            handle_auth_wall(page)
+        # No POST_CARD on this tab (products / jobs / about). Use generic
+        # height-based plateau scroll -- the old 3-iteration window.scrollBy
+        # finished in ~3.6s, which wasn't enough time for Voyager to fire
+        # the products/jobs query, so we ended up with empty tabs.
+        _scroll_until_plateau(page, max_cycles=15, label=tab)
 
     time.sleep(config.MEDIUM_WAIT_S)  # let trailing responses arrive
     result = _merge(page, payloads, slug=slug, tab=tab)
@@ -452,6 +630,7 @@ def _scrape_one_tab(
     result.setdefault("stats", {})["posts_with_reactors"] = sum(
         1 for p in result.get("posts", []) if p.get("reactors")
     )
+    result["pinned"] = pinned
     return result
 
 
@@ -467,6 +646,7 @@ def scrape_company(
     tabs: Iterable[str] = config.DEFAULT_TABS,
     collect_reactors: bool = False,
     max_reactor_scrolls: int = 25,
+    record: bool = False,
 ) -> dict[str, dict[str, Any]]:
     """Scrape one or more sub-tabs of a LinkedIn company page.
 
@@ -490,12 +670,43 @@ def scrape_company(
     out_dir = Path(output_path) if output_path else config.SCRAPED_DATA_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # Pre-flight: if the persistent profile has no live `li_at` cookie, do a
+    # one-shot login inside this same browser launch so the user doesn't have
+    # to run `--login` separately. handle_auth_wall on the first nav covers
+    # cookie-expired / session-rotated cases.
+    if not auth.profile_seems_authenticated():
+        print(
+            f"[main] persistent profile at {config.USER_DATA_DIR} is missing or "
+            "has no li_at cookie -- running login flow before scraping."
+        )
+
     results: dict[str, dict[str, Any]] = {}
 
-    with browser.launch(headless=headless) as (context, page):
+    with browser.launch(headless=headless, record=record) as (context, page):
         # Attach to the context, not just the page: catches popups, popup-opened
         # docs, and any service-worker JSON fetches that bypass the page scope.
         payloads = interceptor.attach(context, dump_dir=config.API_DUMP_DIR)
+
+        # If we flagged the profile as un-authed above, drive a login first.
+        # handle_auth_wall will run auto_login (and manual-pause on MFA).
+        if not auth.profile_seems_authenticated():
+            print("[main] pre-flight: driving /login -> /feed/ inside recorded context")
+            try:
+                page.goto("https://www.linkedin.com/login", wait_until="domcontentloaded")
+                try:
+                    page.wait_for_load_state("load", timeout=5000)
+                except Exception:
+                    pass
+                print(f"[main] pre-flight landed at {page.url}")
+                if "/feed" not in (page.url or ""):
+                    auth.handle_auth_wall(page, return_to="https://www.linkedin.com/feed/")
+                else:
+                    print("[main] pre-flight: already on /feed/, no auth wall handler needed")
+            except Exception as e:
+                print(f"[main] pre-flight login failed: {e} -- continuing; runtime auth recovery may still catch it.")
+        else:
+            print("[main] pre-flight check inside recorded context: profile IS authenticated, skipping login goto")
+
         for tab in requested:
             try:
                 result = _scrape_one_tab(

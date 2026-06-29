@@ -16,6 +16,46 @@ from scraper import config
 from scraper.main import scrape_company
 
 
+LOGIN_URL = "https://www.linkedin.com/login"
+FEED_URL_FRAGMENT = "/feed"
+
+
+def _do_login(headless: bool) -> int:
+    """Open Chromium, run auto_login, wait for /feed (or manual completion).
+
+    Used to seed the persistent profile when the scraper keeps hitting /authwall.
+    Cookies are stored in `config.USER_DATA_DIR`; subsequent scrape runs reuse them.
+    """
+    from scraper import browser as _browser
+    from scraper.auth import handle_auth_wall, is_auth_wall, profile_seems_authenticated
+
+    if profile_seems_authenticated():
+        print(f"[login] persistent profile at {config.USER_DATA_DIR} already has a live li_at cookie; skipping.")
+        return 0
+
+    print(f"[login] opening Chromium against {config.USER_DATA_DIR}")
+    with _browser.launch(headless=headless) as (_context, page):
+        try:
+            page.goto(LOGIN_URL, wait_until="domcontentloaded")
+            try:
+                page.wait_for_load_state("load", timeout=5000)
+            except Exception:
+                pass
+            # If we're already authed (cookie present), goto resolves to /feed.
+            if FEED_URL_FRAGMENT in (page.url or ""):
+                print(f"[login] already logged in -> {page.url}")
+                return 0
+            handle_auth_wall(page, return_to=LOGIN_URL)
+            if is_auth_wall(page):
+                print(f"[login] still walled at {page.url} after recovery; aborting.")
+                return 1
+            print(f"[login] success -> {page.url}")
+            return 0
+        except Exception as e:
+            print(f"[login] failed: {e}")
+            return 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Scrape one or more sub-tabs of a LinkedIn company page.")
     parser.add_argument(
@@ -65,7 +105,27 @@ def main(argv: list[str] | None = None) -> int:
         "--output", default=None,
         help=f"Output directory for per-tab JSON files. Defaults to {config.SCRAPED_DATA_DIR.name}/.",
     )
+    parser.add_argument(
+        "--login", action="store_true",
+        help=(
+            "One-time login mode. Opens Chromium against the persistent profile, "
+            "navigates to /login, fills credentials from .env, then exits. "
+            "Run this first if you keep being redirected to /authwall."
+        ),
+    )
+    parser.add_argument(
+        "--record", action="store_true",
+        help=(
+            "Record a Playwright video of the browser session. Writes one .webm "
+            "per page into demo_videos/<UTC-timestamp>/, slows actions ~120ms so "
+            "motion is visible, and forces a 1440x900 viewport. Let the run "
+            "finish cleanly -- the video is only finalized on context close."
+        ),
+    )
     args = parser.parse_args(argv)
+
+    if args.login:
+        return _do_login(headless=args.headless)
 
     tabs = [t.strip() for t in args.tabs.split(",") if t.strip()]
 
@@ -95,6 +155,7 @@ def main(argv: list[str] | None = None) -> int:
             tabs=tabs,
             collect_reactors=collect_reactors,
             max_reactor_scrolls=max_reactor_scrolls,
+            record=args.record,
         )
     except KeyboardInterrupt:
         print("\n[run] interrupted by user.")

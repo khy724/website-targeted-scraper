@@ -295,3 +295,15 @@ Skipped because:
   for it.
 - **Sequential.** One company at a time. Parallelize by running
   multiple persistent profiles concurrently.
+- **No gap-aware re-scrape.** Each run starts from a blank slate; we
+  don't read the previous `scraped_<slug>_<tab>.json` to figure out
+  what's still missing. A useful follow-up is a *diff-driven* second
+  pass: load the prior output, mark posts where
+  `len(reactors) < reactions_total`, `len(comments) < comments_count`,
+  `author_name` is empty, or `text` got truncated by the API+DOM
+  merge, then re-visit *only those URNs* (deep-link via
+  `linkedin.com/feed/update/{urn}/`) and run the targeted expansion.
+  Cuts incremental refresh cost by 10–100×, makes
+  `--max-reactor-scrolls` / `--max-comment-pages` per-post adaptive
+  instead of global, and gives the user a clean way to "fill the
+  blanks" without re-paying the cost of a full company scrape.
